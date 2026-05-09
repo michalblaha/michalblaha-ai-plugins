@@ -42,7 +42,7 @@ Ověření:
 claude plugin list
 ```
 
-V libovolné Claude Code relaci popište záměr (např. „nastav mi wiki pro téma X" nebo „ingest tento PDF") a Claude vás provede nastavením vaultu.
+V libovolné Claude Code relaci popište záměr (např. „nastav mi wiki pro téma X" nebo „ingest tento PDF") a Claude vás provede.
 
 ---
 
