@@ -117,7 +117,7 @@ Související koncepty propojuj pomocí `[[wikilinks]]`.
 | Filenames | Title Case s mezerami | `Machine Learning.md` |
 | Folders | malá písmena s pomlčkami | `wiki/data-models/` |
 | Tagy | malá písmena, hierarchické | `#domain/architecture` |
-| Wikilinks | přesně podle názvu souboru | `[[Machine Learning]]` |
+| Wikilinks | přesně podle názvu souboru (bez přípony) | `[[Machine Learning]]` |
 
 Filenames musí být ve vault unikátní (jinak nefungují wikilinks bez cesty).
 
