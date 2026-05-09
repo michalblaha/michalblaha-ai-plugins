@@ -4,7 +4,7 @@
   "description": "Nezávislé AI review workflows pro získání druhého názoru, cross-check a multi-model validaci napříč Claude, Codex (OpenAI) a Gemini (Google).",
   "author": {
     "name": "Michal Bláha",
-    "email": "michal+github@michalblaha.cz"
+    "email": "michal+ai-plugins@michalblaha.cz"
   },
   "homepage": "https://github.com/michalblaha/michalblaha-ai-plugins",
   "repository": "https://github.com/michalblaha/michalblaha-ai-plugins",

@@ -3,7 +3,7 @@
   "description": "AI plugins od Michala Bláhy pro Claude Code a Codex CLI: znalostní báze, cross-model review a další companion nástroje.",
   "owner": {
     "name": "Michal Bláha",
-    "email": "michal+github@michalblaha.cz"
+    "email": "michal+ai-plugins@michalblaha.cz"
   },
   "plugins": [
     {
