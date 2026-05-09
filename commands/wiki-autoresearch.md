@@ -5,8 +5,8 @@ description: Spustí autonomní výzkumnou smyčku nad zadaným tématem. Prohle
 Načti skill `wiki-autoresearch`. Poté spusť výzkumnou smyčku.
 
 Použití:
-- `/autoresearch [topic]` — výzkum konkrétního tématu
-- `/autoresearch` — zeptej se „K jakému tématu mám provést výzkum?"
+- `/wiki-autoresearch [topic]` — výzkum konkrétního tématu
+- `/wiki-autoresearch` — zeptej se „K jakému tématu mám provést výzkum?"
 
 Před začátkem si načti `skills/wiki-autoresearch/references/default.md` (nebo `gov-project.md`, pokud je vyžádán) pro nahrání omezení a cílů výzkumu.
 

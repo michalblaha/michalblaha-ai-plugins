@@ -75,7 +75,7 @@ Claude přečte hot cache, prohledá rejstřík, ponoří se do relevantních st
 | `ingest [file]` | Načte zdroj, vytvoří 8–15 wiki stránek, aktualizuje rejstřík a log |
 | `ingest all of these` | Dávkové zpracování více zdrojů, poté křížové propojení |
 | `what do you know about X?` | Přečte rejstřík → relevantní stránky → syntetizuje odpověď |
-| `/autoresearch [topic]` | Autonomní výzkumná smyčka: vyhledá, stáhne, syntetizuje, založí |
+| `/wiki-autoresearch [topic]` | Autonomní výzkumná smyčka: vyhledá, stáhne, syntetizuje, založí |
 | `lint the wiki` | Health check: orphans, dead links, mezery |
 | `update hot cache` | Obnoví `hot.md` aktuálním shrnutím kontextu |
 

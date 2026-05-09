@@ -82,7 +82,7 @@ claude plugin list
 | `ingest [file]` | Načte zdroj, vytvoří 8–15 wiki stránek, aktualizuje rejstřík a log |
 | `ingest all of these` | Dávkové zpracování více zdrojů a následné křížové propojení |
 | `what do you know about X?` | Přečte rejstřík → relevantní stránky → syntetizuje odpověď |
-| `/autoresearch [topic]` | Spustí autonomní výzkumnou smyčku: vyhledá, stáhne, syntetizuje, založí |
+| `/wiki-autoresearch [topic]` | Spustí autonomní výzkumnou smyčku: vyhledá, stáhne, syntetizuje, založí |
 | `lint the wiki` | Health check: orphans, dead links, mezery, návrhy |
 | `update hot cache` | Obnoví `hot.md` aktuálním shrnutím kontextu |
 
@@ -213,7 +213,7 @@ claude-wikitools/
 │   └── wiki-lint.md             # health check agent
 ├── commands/
 │   ├── wiki.md                  # /wiki bootstrap příkaz
-│   └── autoresearch.md          # /autoresearch příkaz
+│   └── wiki-autoresearch.md     # /wiki-autoresearch příkaz
 ├── hooks/
 │   └── hooks.json               # SessionStart + Stop hot cache hooks
 ├── _templates/                  # Templater šablony
@@ -229,7 +229,7 @@ claude-wikitools/
 
 ## AutoResearch: program.md
 
-Příkaz `/autoresearch` (skill `wiki-autoresearch`) je konfigurovatelný. Upravte `skills/wiki-autoresearch/references/default.md` (nebo `gov-project.md`) a ovládněte:
+Příkaz `/wiki-autoresearch` (skill `wiki-autoresearch`) je konfigurovatelný. Upravte `skills/wiki-autoresearch/references/default.md` (nebo `gov-project.md`) a ovládněte:
 
 - Které zdroje preferovat (akademické, oficiální dokumentace, zprávy)
 - Pravidla pro hodnocení míry jistoty (confidence)
