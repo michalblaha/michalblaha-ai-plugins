@@ -49,5 +49,5 @@ Při první relaci:
 
 ## Odkazy na projekt
 
-- Plugin: https://github.com/michalblaha/claude-wiki-tools
+- Plugin: https://github.com/michalblaha/claude-wikitools
 - Vzor: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
