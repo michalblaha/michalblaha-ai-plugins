@@ -1,7 +1,7 @@
 # wiki-tools — Instalační průvodce
 
 **Společník pro znalostní bázi nad Claude**
-[github.com/michalblaha/claude-wikitools](https://github.com/michalblaha/claude-wikitools)
+[github.com/michalblaha/michalblaha-ai-plugins](https://github.com/michalblaha/michalblaha-ai-plugins)
 
 ---
 
@@ -31,10 +31,10 @@ Instalace pluginu je dvoukroková. Nejprve přidáte marketplace katalog, poté 
 
 ```bash
 # Krok 1: přidat marketplace
-claude plugin marketplace add michalblaha/claude-wikitools
+claude plugin marketplace add michalblaha/michalblaha-ai-plugins
 
 # Krok 2: nainstalovat plugin
-claude plugin install wiki-tools@wiki-tools-marketplace
+claude plugin install wiki-tools@michalblaha-ai-plugins
 ```
 
 Ověření:
@@ -103,7 +103,7 @@ Nainstalujte ze **Settings → Community Plugins**:
 
 ## Podpora
 
-- **GitHub**: [github.com/michalblaha/claude-wikitools](https://github.com/michalblaha/claude-wikitools)
+- **GitHub**: [github.com/michalblaha/michalblaha-ai-plugins](https://github.com/michalblaha/michalblaha-ai-plugins)
 
 ---
 
