@@ -8,30 +8,15 @@
   "plugins": [
     {
       "name": "wiki-tools",
-      "source": "./",
+      "source": "./plugins/wiki-tools",
       "description": "Trvalá kumulující se znalostní báze pro Claude + Obsidian. Ingest zdrojů, dotazy s citacemi, autonomní výzkum a health check vaultu.",
-      "version": "1.1.0",
-      "author": {
-        "name": "Michal Bláha",
-        "email": "michal+github@michalblaha.cz"
-      },
-      "homepage": "https://github.com/michalblaha/claude-wikitools",
-      "repository": "https://github.com/michalblaha/claude-wikitools",
-      "license": "MIT",
-      "category": "knowledge-management",
-      "tags": [
-        "obsidian",
-        "wiki",
-        "knowledge-base",
-        "research",
-        "second-brain",
-    "memory",
-    "notetaker",
-    "vault",
-    "markdown",
-    "llm-wiki",
-    "karpathy"
-          ]
+      "category": "knowledge-management"
+    },
+    {
+      "name": "ai-review",
+      "source": "./plugins/ai-review",
+      "description": "Nezávislé AI review workflows pro druhý názor a cross-check napříč Claude, Codex (OpenAI) a Gemini (Google). Volitelný companion plugin pro wiki-tools.",
+      "category": "productivity"
     }
   ]
 }

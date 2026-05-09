@@ -88,6 +88,22 @@ claude plugin list
 
 ---
 
+## Companion plugin: ai-review (volitelné)
+
+`ai-review` je samostatný plugin ze stejného marketplace, který přidává cross-check a druhý názor od jiných modelů (Codex, Gemini, Claude Code CLI). Pokud je nainstalován společně s `wiki-tools`, wiki skills ho automaticky využijí pro:
+
+- **Ověřování faktografických tvrzení** během `ingest` (skill `double-cross-check`)
+- **Hlubší validaci** v deep módu `wiki-query` (skill `second-opinion`)
+- **Cross-source porovnání** v `wiki-lint` při detekci rozporů
+
+`wiki-tools` funguje plně samostatně i bez něj — tato integrace je gracefully optional. Instalace:
+
+```
+/plugin install ai-review@wiki-tools-marketplace
+```
+
+---
+
 ## Cross-Project napojení
 
 Můžete na tuto wiki ukázat z jiného Claude Code projektu. Do `CLAUDE.md` daného projektu přidejte:

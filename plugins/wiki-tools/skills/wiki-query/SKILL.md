@@ -162,3 +162,9 @@ Pokud nelze otázku zodpovědět z wiki:
 2. Identifikuj konkrétní mezeru: „Nemám nic o [podtématu]."
 3. Navrhni: „Chcete najít zdroj? Můžu pomoct s vyhledáním nebo zpracováním."
 4. Nevymýšlej. Pokud je dotaz o konkrétní doméně této wiki, neodpovídej z tréninkových dat.
+
+---
+
+## Volitelné: druhý názor v deep módu
+
+V deep módu (rozsáhlé syntézy, sporné domény, rozhodnutí s vyššími stakes) můžeš po sestavení odpovědi spustit skill `second-opinion` (z companion pluginu `ai-review`) pro nezávislou validaci od jiného modelu. Pokud plugin není nainstalován, vyhodnoť odpověď sám a explicitně označ tvrzení, která by si zasloužila externí cross-check.

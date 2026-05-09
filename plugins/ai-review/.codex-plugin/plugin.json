@@ -1,0 +1,23 @@
+{
+  "name": "ai-review",
+  "version": "1.0.0",
+  "description": "Nezávislé AI review workflows pro získání druhého názoru, cross-check a multi-model validaci napříč Claude, Codex (OpenAI) a Gemini (Google).",
+  "author": {
+    "name": "Michal Bláha",
+    "email": "michal+github@michalblaha.cz"
+  },
+  "homepage": "https://github.com/michalblaha/claude-wikitools",
+  "repository": "https://github.com/michalblaha/claude-wikitools",
+  "license": "MIT",
+  "keywords": [
+    "review",
+    "second-opinion",
+    "cross-check",
+    "validation",
+    "multi-model",
+    "fact-check",
+    "codex",
+    "gemini"
+  ],
+  "skills": "./skills/"
+}

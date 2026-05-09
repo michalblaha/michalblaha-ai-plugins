@@ -182,3 +182,9 @@ Stará tvrzení tiše nepřepisuj. Označ a nech rozhodnout uživatele.
 - Nevytvářej duplicitní stránky. Před vytvořením vždy zkontroluj rejstřík a vyhledávání.
 - Nevynechávej log záznam. Každý ingest musí být zaznamenán.
 - Nevynechávej aktualizaci hot cache. Ta drží budoucí relace rychlé.
+
+---
+
+## Volitelné: cross-check faktografie
+
+Pokud je u uživatele nainstalován companion plugin `ai-review`, můžeš pro klíčová faktografická tvrzení (data, čísla, jména, kauzální nároky) spustit skill `double-cross-check`. Použij ho cíleně — jen pro tvrzení s vyššími stakes, ne pro každý odstavec (skill je drahý a pomalý). Pokud skill není dostupný, ingest pokračuj bez ověření a tvrzení s nejistou zdrojovou kvalitou označ calloutem `> [!gap] Vyžaduje ověření.`.

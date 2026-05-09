@@ -1,7 +1,7 @@
 {
   "name": "wiki-tools",
   "description": "Trvalá kumulující se znalostní báze pro Claude + Obsidian. Ingest zdrojů, dotazy s citacemi, autonomní výzkum a health check vaultu podle vzoru LLM Wiki od Andreje Karpathyho.",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "author": {
     "name": "Michal Bláha",
     "email": "michal+github@michalblaha.cz"
@@ -10,16 +10,20 @@
   "repository": "https://github.com/michalblaha/claude-wikitools",
   "license": "MIT",
   "keywords": [
-      "obsidian",
-        "wiki",
-        "knowledge-base",
-        "research",
-        "second-brain",
+    "obsidian",
+    "wiki",
+    "knowledge-base",
+    "research",
+    "second-brain",
     "memory",
     "notetaker",
     "vault",
     "markdown",
     "llm-wiki",
     "karpathy"
-  ]
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "commands": "./commands/",
+  "hooks": "./hooks/hooks.json"
 }
