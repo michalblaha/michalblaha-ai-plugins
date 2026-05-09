@@ -7,7 +7,7 @@
 
 ## Co je wiki-tools?
 
-`wiki-tools` je Claude Code plugin , který buduje a udržuje trvalou, kumulující se znalostní bázi. Každý zdroj, který přidáte, se zpracuje do křížově propojených wiki stránek. Každá otázka, kterou položíte, čerpá ze všeho, co bylo přečteno. Znalosti se kumulují jako úroky.
+`wiki-tools` je Claude Code plugin, který buduje a udržuje trvalou, kumulující se znalostní bázi. Každý zdroj, který přidáte, se zpracuje do křížově propojených wiki stránek. Každá otázka, kterou položíte, čerpá ze všeho, co bylo přečteno. Znalosti se kumulují jako úroky.
 
 Postaveno na vzoru LLM Wiki od Andreje Karpathyho.
 
@@ -42,13 +42,17 @@ Ověření:
 claude plugin list
 ```
 
-V libovolné Claude Code relaci napište `/wiki-tools` a Claude vás provede nastavením vaultu.
+V libovolné Claude Code relaci popište záměr (např. „nastav mi wiki pro téma X" nebo „ingest tento PDF") a Claude vás provede nastavením vaultu.
 
 ---
 
 ## První kroky
 
-### 1. Vložte první zdroj
+### 1. Setup vaultu
+
+Popište agentovi účel vaultu — např. „nastav mi wiki pro výzkum státních zakázek" nebo „založ wiki k mé doménové znalosti X". Claude vytvoří strukturu složek a hlavní soubory (`wiki/index.md`, `wiki/hot.md`, `wiki/log.md`, `wiki/overview.md`).
+
+### 2. Vložte první zdroj
 
 Vložte libovolný dokument do `raw/`:
 - PDF, markdown soubory, transkripty, články, URL
@@ -71,7 +75,7 @@ Claude přečte hot cache, prohledá rejstřík, ponoří se do relevantních st
 
 | Příkaz | Co Claude udělá |
 |---------|-----------------|
-| `/wiki` | Kontrola nastavení, scaffold, nebo pokračování tam, kde jste skončili |
+| „set up wiki for [topic]" | Bootstrap: kontrola nastavení, scaffold, nebo pokračování tam, kde jste skončili |
 | `ingest [file]` | Načte zdroj, vytvoří 8–15 wiki stránek, aktualizuje rejstřík a log |
 | `ingest all of these` | Dávkové zpracování více zdrojů, poté křížové propojení |
 | `what do you know about X?` | Přečte rejstřík → relevantní stránky → syntetizuje odpověď |

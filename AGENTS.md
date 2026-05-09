@@ -28,7 +28,7 @@ ln -s "$(pwd)/skills" ~/.opencode/skills/wiki-tools
 | `html-clean` | clean this url, defuddle |
 | `obsidian-markdown` | reference Obsidian Markdown syntaxe (wikilinks, callouts, frontmatter) |
 
-Bootstrap příkaz `/wiki` (`commands/wiki.md`) provede setup vaultu.
+Setup vaultu provedete tím, že agentovi popíšete účel vaultu (např. „nastav mi wiki pro výzkum státních zakázek") — agent přečte tento soubor, projektový `CLAUDE.md` a vytvoří strukturu složek a hlavní soubory (`wiki/index.md`, `wiki/hot.md`, `wiki/log.md`, `wiki/overview.md`).
 
 ## Klíčové konvence
 
@@ -44,4 +44,4 @@ Když uživatel projekt poprvé otevře:
 
 1. Přečtěte tento soubor (`AGENTS.md`) a projektový `CLAUDE.md` pro plný kontext
 2. Pokud existuje `wiki/hot.md`, tiše jej přečtěte pro obnovu nedávného kontextu
-3. Pokud uživatel napíše `/wiki` (nebo „set up wiki"), spusťte scaffold workflow z `commands/wiki.md`
+3. Pokud uživatel popíše setup vaultu (např. „set up wiki", „založ wiki pro..."), vytvořte strukturu složek a hlavní soubory podle účelu vaultu

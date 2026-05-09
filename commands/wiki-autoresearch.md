@@ -10,7 +10,7 @@ Použití:
 
 Před začátkem si načti `skills/wiki-autoresearch/references/default.md` (nebo `gov-project.md`, pokud je vyžádán) pro nahrání omezení a cílů výzkumu.
 
-Pokud ještě není nastaven žádný vault, řekni: „Nenalezen wiki vault. Nejprve spusť `/wiki` pro nastavení."
+Pokud ještě není nastaven žádný vault, řekni: „Nenalezen wiki vault. Nejprve si vyžádej setup vaultu (např. „nastav mi wiki pro téma X")."
 
 Po dokončení výzkumu aktualizuj `wiki/index.md`, `wiki/log.md` a `wiki/hot.md`.
 

@@ -155,7 +155,7 @@ Tokenový rozpočet je důležitý. Při ingestu dodržuj:
 ## Rozpory
 
 > [!note] Závislost na vlastním calloutu
-> Typ calloutu `[!contradiction]` použitý níže je **vlastní callout** definovaný v `.obsidian/snippets/vault-colors.css` (auto-instalovaný `/wiki` scaffoldem). Renderuje se s červenohnědým stylem a alert-triangle ikonou, je-li snippet zapnutý. Pokud snippet chybí, Obsidian použije výchozí styl calloutu, takže stránka funguje i bez vizuálního zvýraznění.
+> Typ calloutu `[!contradiction]` použitý níže je **vlastní callout** definovaný v `.obsidian/snippets/vault-colors.css` (auto-instalovaný při bootstrap setup workflow). Renderuje se s červenohnědým stylem a alert-triangle ikonou, je-li snippet zapnutý. Pokud snippet chybí, Obsidian použije výchozí styl calloutu, takže stránka funguje i bez vizuálního zvýraznění.
 
 Když nové info odporuje existující wiki stránce:
 

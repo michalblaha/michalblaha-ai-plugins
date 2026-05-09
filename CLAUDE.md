@@ -4,7 +4,7 @@ Tato složka je Claude Code / Codex plugin.
 
 **Název pluginu:** `wiki-tools`
 **Skills:** `wiki-ingest`, `wiki-query`, `wiki-lint`, `wiki-autoresearch`, `html-clean`, `obsidian-markdown`
-**Příkazy:** `/wiki`, `/wiki-autoresearch`
+**Příkazy:** `/wiki-autoresearch`
 **Cesta k vaultu:** Tento adresář (otevřete přímo v Obsidianu)
 
 ## K čemu tento vault slouží
@@ -48,9 +48,8 @@ Wiki NEČTĚTE pro obecné programátorské dotazy nebo pro věci, které jsou j
 
 | Skill | Trigger |
 |-------|---------|
-| `wiki` (příkaz) | `/wiki` — setup, scaffold, routování |
 | `wiki-ingest` | `ingest [source]` — ingest jednoho nebo více zdrojů |
-| `wiki-query` | `query: [question]` — odpovědi z obsahu wiki |
+| `wiki-query` | `query: [question]`, `what do you know about...` — odpovědi z obsahu wiki |
 | `wiki-lint` | `lint the wiki` — health check |
 | `wiki-autoresearch` | `/wiki-autoresearch [topic]` — autonomní výzkumná smyčka |
 | `html-clean` | `clean this url`, `defuddle` — čištění webových stránek |

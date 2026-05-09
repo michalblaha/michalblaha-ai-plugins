@@ -65,6 +65,32 @@ Pro lékařský a zdravotnický výzkum:
 - Vždy poznamenat: velikost vzorku, typ studie (RCT vs. observační) a recentnost
 
 ---
+## Ukládání výsledků
+
+Po dokončení rešerše vytvořte tyto stránky:
+
+**wiki/zdroje/**. Jedna stránka pro každý nalezený významný zdroj
+
+Použijte frontmatter zdroje (type, source_type, author, date_published, url, confidence, key_claims)
+Tělo: shrnutí zdroje, čím přispívá k tématu
+
+wiki/myslenky/**. Jedna stránka pro každý extrahovaný významný koncept
+
+Stránku vytvořte pouze tehdy, je-li koncept dostatečně samostatný
+Nejprve zkontrolujte index: namísto vytváření duplicit aktualizujte stávající stránky konceptů
+
+wiki/entity/**. Jedna stránka pro každou identifikovanou významnou osobu, organizaci nebo produkt
+
+Nejprve zkontrolujte index: aktualizujte stávající stránky entit
+
+wiki/reserse/**. Jedna syntetická stránka s názvem „Research: [Topic]"
+
+Toto je hlavní syntéza. Vše se zde sbíhá dohromady.
+
+Sekce: Overview (Přehled), Key Findings (Klíčová zjištění), Entities (Entity), Concepts (Koncepty), Contradictions (Rozpory), Open Questions (Otevřené otázky), Sources (Zdroje)
+Kompletní frontmatter s odkazy na všechny stránky vytvořené v této relaci
+
+---
 
 ## Vyloučení
 

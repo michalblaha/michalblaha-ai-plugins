@@ -5,7 +5,7 @@ description: >
   zdroje, syntetizuje nálezy a založí vše do wiki jako strukturované stránky.
   Postaveno na vzoru Karpathyho autoresearch: program.md konfiguruje cíle a omezení,
   smyčka běží do dosažení požadované hloubky, výstup jde přímo do znalostní báze.
-  Triggers on: "/wiki-autoresearch", "autoresearch", "research [topic]", "deep dive into [topic]",
+  Triggers on: "/wiki-autoresearch", "autoresearch","prozkoumej do hloubky", "research [topic]", "deep dive into [topic]",
   "investigate [topic]", "find everything about [topic]", "research and file",
   "go research", "build a wiki on".
 allowed-tools: Read Write Edit Glob Grep WebFetch WebSearch

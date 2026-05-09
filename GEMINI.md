@@ -21,11 +21,11 @@ ln -s "$(pwd)/skills" ~/.gemini/skills/wiki-tools
 | `html-clean` | Čistí webové stránky před ingestem (úspora 40–60 % tokenů) |
 | `obsidian-markdown` | Reference na Obsidian Flavored Markdown |
 
-Bootstrap příkaz `/wiki` (`commands/wiki.md`) provede setup vaultu.
+Setup vaultu provedete tím, že agentovi popíšete účel vaultu (např. „set up a wiki for state contracts research") — agent vytvoří strukturu složek a hlavní soubory.
 
 ## Trigger fráze (příklady)
 
-- „set up wiki" → příkaz `/wiki`
+- „set up wiki" → bootstrap workflow (vytvoření struktury vaultu)
 - „ingest this article" → `wiki-ingest`
 - „ingest https://example.com/article" → `wiki-ingest` (URL mód)
 - „what do you know about X" → `wiki-query`
@@ -45,7 +45,7 @@ Bootstrap příkaz `/wiki` (`commands/wiki.md`) provede setup vaultu.
 Při první relaci:
 1. Přečtěte tento soubor + projektový `CLAUDE.md`
 2. Pokud existuje `wiki/hot.md`, tiše jej přečtěte pro obnovu nedávného kontextu
-3. Počkejte, až uživatel napíše `/wiki`, `ingest` nebo `query`
+3. Počkejte, až uživatel popíše svůj záměr (`ingest`, `query`, „set up wiki" atd.)
 
 ## Odkazy na projekt
 

@@ -22,9 +22,9 @@ U faktických tvrzení vždy uvádějte datum zdroje. Tvrzení ze zdrojů starš
 
 ---
 ## Omezení smyčky
-- Maximální počet kol vyhledávání na téma: **3**
-- Maximální počet wiki stránek vytvořených za relaci: **15**
-- Maximální počet zdrojů stažených v jednom kole: **5**
+- Maximální počet kol vyhledávání na téma: **5**
+- Maximální počet wiki stránek vytvořených za relaci: **20**
+- Maximální počet zdrojů stažených v jednom kole: **10**
 - Pokud je dosaženo maxima stránek před dokončením smyčky: založte, co máte, a co bylo vynecháno, poznamenejte do sekce Open Questions
 
 ---
@@ -37,19 +37,15 @@ U faktických tvrzení vždy uvádějte datum zdroje. Tvrzení ze zdrojů starš
 
 ---
 ## Poznámky k doméně
-[Zde doplňte instrukce specifické pro vaši doménu. Příklady:]
 
-Pro výzkum v oblasti AI/tech:
-- Preferovat: arXiv, oficiální GitHub repozitáře, oficiální produktovou dokumentaci, diskuze na Hacker News s vysokou karmou
-- Pozor: benchmarky LLM bývají často „ohýbány" — tvrzení z leaderboardů považujte za málo důvěryhodná, dokud nejsou nezávisle ověřena
+Pro výzkum v oblasti státních zakázek:
+- Preferuj: Hlídač státu, veřejné zakázky (Hlídač státu, nen.gov.cz, zakazky.gov.cz), oficiální produktovou dokumentaci, 
+
+Poznámka: Pokud není nainstalovaný MCP server Hlídač státu, instaluj dle instrukcí na https://mcp.api.hlidacstatu.cz/doc
 
 Pro byznysový a tržní výzkum:
-- Preferovat: výroční zprávy a regulatorní podání společností (company filings), Crunchbase, Bloomberg, ověřené oborové reporty
-- Flagovat: tiskové zprávy jako málo důvěryhodné bez nezávislého ověření
-
-Pro lékařský a zdravotnický výzkum:
-- Preferovat: PubMed, Cochrane reviews, peer-reviewed klinické studie
-- Vždy poznamenat: velikost vzorku, typ studie (RCT vs. observační) a recentnost
+- Preferovat: výroční zprávy a regulatorní podání společností (company filings), obchodní rejstřík (https://or.justice.cz/) , ověřené oborové reporty, ověřená média
+- Označit: tiskové zprávy jako málo důvěryhodné bez nezávislého ověření
 
 ---
 ## Vyloučení
@@ -63,24 +59,35 @@ Jako zdroje s vysokou mírou jistoty necitujte:
 ## Ukládání výsledků
 Po dokončení výzkumu vytvořte tyto stránky:
 
-**wiki/projekty/**. Jedna stránka na každou významnou nalezenou referenci
-- Použijte source frontmatter (type, source_type, author, date_published, url, confidence, key_claims)
-- Tělo: shrnutí zdroje, čím přispívá k tématu
+**wiki/projekty/**. Jedna stránka na každý významný státní projekt nebo iniciativu
+- Použijte frontmatter typu `project` (název, zadavatel, dodavatel, hodnota, stav, období)
+- Tělo: popis projektu, kontext, klíčové milníky, finanční toky, vazby na osoby a instituce
+- Křížově odkazujte na příslušné instituce, dodavatele a osoby
 
-**wiki/dodavatelé/**. Jedna stránka na každý významný extrahovaný koncept
-- Stránku vytvořte pouze tehdy, je-li koncept dostatečně podstatný, aby stál samostatně
-- Nejprve zkontrolujte index: existující koncepční stránky aktualizujte, místo abyste vytvářeli duplikáty
+**wiki/dodavatelé/**. Jedna stránka na každého významného dodavatele (firmu, subjekt, který obchoduje se státem)
+- Použijte frontmatter typu `entity` se `entity_type: company` (IČO, sídlo, vlastnická struktura, K-index)
+- Tělo: čím se firma zabývá, jaké zakázky získala, vazby na politicky exponované osoby
+- Nejprve zkontrolujte index: existující stránky dodavatelů aktualizujte, místo abyste vytvářeli duplikáty
 
-**wiki/instituce/**. Jedna stránka na každou významnou identifikovanou osobu, organizaci nebo produkt
-- Nejprve zkontrolujte index: aktualizujte existující stránky entit
+**wiki/instituce/**. Jedna stránka na každou významnou státní instituci (ministerstvo, úřad, agenturu, kraj, obec)
+- Použijte frontmatter typu `entity` se `entity_type: institution`
+- Tělo: působnost, vedení, podřízené organizace, vystavené zakázky, dotační programy
+- Nejprve zkontrolujte index: aktualizujte existující stránky institucí
 
-**wiki/osoby/**. Jedna stránka na každou významnou identifikovanou osobu, organizaci nebo produkt
-- Nejprve zkontrolujte index: aktualizujte existující stránky entit
+**wiki/osoby/**. Jedna stránka na každou významnou identifikovanou osobu (politik, úředník, vlastník, lobbista)
+- Použijte frontmatter typu `entity` se `entity_type: person` (role, funkce, období, afiliace)
+- Tělo: životopis ve vztahu k tématu, funkce, vazby na firmy a instituce, sponzorské dary
+- Nejprve zkontrolujte index: aktualizujte existující stránky osob
 
-**wiki/media/**. Jedna stránka na každou významnou identifikovanou osobu, organizaci nebo produkt
-- Nejprve zkontrolujte index: aktualizujte existující stránky entit
+**wiki/media/**. Jedna stránka na každý významný mediální zdroj (médium, redakci, novináře)
+- Použijte frontmatter typu `source` se `source_type: media` (název, autor, datum, URL)
+- Tělo: shrnutí zjištění, kterých kauz se médium dotklo, hodnocení důvěryhodnosti
+- Použijte tuto složku pro průběžné mediální zdroje; pro jednorázové články používejte standardní `wiki/sources/`
 
 **wiki/otazky/**. Jedna syntetizující stránka s názvem „Research: [Topic]"
 - Toto je hlavní syntéza. Všechno se zde sbíhá dohromady.
 - Sekce: Overview, Key Findings, Entities, Concepts, Contradictions, Open Questions, Sources
 - Plný frontmatter s `related` odkazy na všechny stránky vytvořené v této relaci
+
+
+

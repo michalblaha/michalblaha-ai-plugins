@@ -49,7 +49,7 @@ cd claude-wikitools
 
 Otevřete složku v Obsidianu: **Manage Vaults → Open folder as vault → vyberte `claude-wikitools/`**
 
-Otevřete Claude Code ve stejné složce. Napište `/wiki`.
+Otevřete Claude Code ve stejné složce. Popište, k čemu má wiki sloužit (např. „nastav mi wiki pro výzkum státních zakázek"), a Claude vytvoří strukturu vaultu.
 
 ---
 
@@ -65,7 +65,7 @@ claude plugin marketplace add michalblaha/claude-wikitools
 claude plugin install wiki-tools@wiki-tools-marketplace
 ```
 
-V libovolné Claude Code relaci napište `/wiki`. Claude vás provede nastavením vaultu.
+V libovolné Claude Code relaci popište záměr (např. „nastav mi wiki pro téma X" nebo „ingest tento PDF"). Claude vás provede nastavením vaultu a začne ingestovat zdroje.
 
 Ověření:
 ```bash
@@ -78,7 +78,7 @@ claude plugin list
 
 | Co napíšete | Co Claude udělá |
 |---------|------------|
-| `/wiki` | Kontrola nastavení, scaffold, nebo pokračování tam, kde jste skončili |
+| „set up wiki for [topic]" | Bootstrap: kontrola nastavení, scaffold, nebo pokračování tam, kde jste skončili |
 | `ingest [file]` | Načte zdroj, vytvoří 8–15 wiki stránek, aktualizuje rejstřík a log |
 | `ingest all of these` | Dávkové zpracování více zdrojů a následné křížové propojení |
 | `what do you know about X?` | Přečte rejstřík → relevantní stránky → syntetizuje odpověď |
@@ -212,7 +212,6 @@ claude-wikitools/
 │   ├── wiki-ingest.md           # paralelní ingest agent
 │   └── wiki-lint.md             # health check agent
 ├── commands/
-│   ├── wiki.md                  # /wiki bootstrap příkaz
 │   └── wiki-autoresearch.md     # /wiki-autoresearch příkaz
 ├── hooks/
 │   └── hooks.json               # SessionStart + Stop hot cache hooks
