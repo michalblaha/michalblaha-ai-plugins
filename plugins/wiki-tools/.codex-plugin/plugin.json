@@ -23,5 +23,13 @@
     "karpathy"
   ],
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json"
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "wiki-tools",
+    "shortDescription": "Trvalá kumulující se znalostní báze pro Codex + Obsidian.",
+    "longDescription": "Ingest zdrojů, dotazy s citacemi, autonomní výzkum a health check vaultu podle vzoru LLM Wiki od Andreje Karpathyho. Wiki se s každým zpracovaným zdrojem obohacuje. Companion plugin ai-review přidává cross-check.",
+    "developerName": "Michal Bláha",
+    "category": "Productivity",
+    "websiteURL": "https://github.com/michalblaha/michalblaha-ai-plugins"
+  }
 }

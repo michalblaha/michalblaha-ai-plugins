@@ -19,5 +19,13 @@
     "codex",
     "gemini"
   ],
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ai-review",
+    "shortDescription": "Nezávislé AI review napříč Codex, Gemini a Claude Code.",
+    "longDescription": "Skills pro získání druhého názoru (second-opinion) a fact-check (double-cross-check) od jiného AI providera. Použij pro validaci architektonických rozhodnutí, kontrolu bezpečnosti kódu, ověřování faktografie nebo multi-model konsenzus u rozhodnutí s vyššími stakes.",
+    "developerName": "Michal Bláha",
+    "category": "Productivity",
+    "websiteURL": "https://github.com/michalblaha/michalblaha-ai-plugins"
+  }
 }
