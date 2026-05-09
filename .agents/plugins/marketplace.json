@@ -7,6 +7,7 @@
   },
   "plugins": [
     {
+      "name": "wiki-tools",
       "source": {
         "path": "./plugins/wiki-tools"
       },
@@ -20,6 +21,7 @@
       }
     },
     {
+      "name": "ai-review",
       "source": {
         "path": "./plugins/ai-review"
       },
