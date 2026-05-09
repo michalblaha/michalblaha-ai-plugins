@@ -18,6 +18,5 @@
     "fact-check",
     "codex",
     "gemini"
-  ],
-  "skills": "./skills/"
+  ]
 }

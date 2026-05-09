@@ -21,9 +21,5 @@
     "markdown",
     "llm-wiki",
     "karpathy"
-  ],
-  "skills": "./skills/",
-  "agents": "./agents/",
-  "commands": "./commands/",
-  "hooks": "./hooks/hooks.json"
+  ]
 }
