@@ -73,13 +73,13 @@ EOF
 
 #### Simple Question
 ```bash
-gemini -p "Your question here" --output-format text > /tmp/claude/answer.txt
+gemini --skip-trust -p "Your question here" --output-format text > /tmp/claude/answer.txt
 cat /tmp/claude/answer.txt
 ```
 
 #### JSON Output
 ```bash
-gemini -p "Analyze [topic]. Respond in JSON with: assessment (string), strengths (array), concerns (array), recommendation (string)" \
+gemini --skip-trust -p "Analyze [topic]. Respond in JSON with: assessment (string), strengths (array), concerns (array), recommendation (string)" \
   --output-format json > /tmp/claude/result.json
 cat /tmp/claude/result.json
 ```
@@ -123,7 +123,7 @@ cat /tmp/claude/arch.txt
 
 **Gemini:**
 ```bash
-gemini -p "Review this architecture decision: [description].
+gemini --skip-trust -p "Review this architecture decision: [description].
   Assess: scalability, maintainability, security risks, alternatives." \
   --output-format text > /tmp/claude/arch.txt
 cat /tmp/claude/arch.txt
@@ -152,7 +152,7 @@ cat /tmp/claude/security.txt
 
 **Gemini:**
 ```bash
-gemini -p "Security review of [file/code]:
+gemini --skip-trust -p "Security review of [file/code]:
   - Input validation
   - Authentication/authorization
   - Data exposure risks
@@ -184,7 +184,7 @@ cat /tmp/claude/review.txt
 
 **Gemini:**
 ```bash
-gemini -p "Review [file] for: bugs, performance issues, maintainability.
+gemini --skip-trust -p "Review [file] for: bugs, performance issues, maintainability.
   Provide line-level recommendations." \
   --output-format text > /tmp/claude/review.txt
 cat /tmp/claude/review.txt
@@ -291,7 +291,7 @@ codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort=
   "Should we use Redis or PostgreSQL for session storage in e-commerce app?"
 
 # 2. Ask Gemini
-gemini -p "Should we use Redis or PostgreSQL for session storage in e-commerce app?" \
+gemini --skip-trust -p "Should we use Redis or PostgreSQL for session storage in e-commerce app?" \
   --output-format text > /tmp/claude/gemini_opinion.txt
 
 # 3. Ask Claude Code

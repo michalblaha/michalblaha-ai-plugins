@@ -171,7 +171,7 @@ cat "$WORK/result.json"
 WORK=$(mktemp -d)
 
 # Jednoduchá otázka — auto-routing vybere model
-gemini -p "Tvá otázka tady" --output-format text > "$WORK/answer.txt"
+gemini --skip-trust -p "Tvá otázka tady" --output-format text > "$WORK/answer.txt"
 cat "$WORK/answer.txt"
 
 # Explicitní výběr modelu
@@ -179,7 +179,7 @@ gemini -m gemini-3-pro -p "Tvá otázka tady" \
   --output-format text > "$WORK/answer.txt"
 
 # JSON výstup (bez schema validace)
-gemini -p "Analyzuj [téma]. Odpověz JSONem s klíči assessment (string), strengths (array), concerns (array), recommendation (string)." \
+gemini --skip-trust -p "Analyzuj [téma]. Odpověz JSONem s klíči assessment (string), strengths (array), concerns (array), recommendation (string)." \
   --output-format json > "$WORK/result.json"
 cat "$WORK/result.json"
 ```
@@ -257,7 +257,7 @@ cat "$WORK/dataset_review.txt"
 
 ```bash
 WORK=$(mktemp -d)
-gemini -p "Posuď toto architektonické rozhodnutí: [popis].
+gemini --skip-trust -p "Posuď toto architektonické rozhodnutí: [popis].
   Buď skeptický. Hodnoť: škálovatelnost, udržovatelnost, bezpečnostní rizika, alternativy.
   Pro každou výhradu: konkrétní scénář, kde rozhodnutí selže." \
   --output-format text > "$WORK/arch.txt"
