@@ -66,6 +66,9 @@ claude --version || echo "Claude Code CLI není nainstalované"
 
 **Fallback při selhání volání Codexu:** Pokud `codex exec` přesto selže (timeout, autentizační problém, runtime error), zkus delegovat ověření na `codex:codex-rescue` skill / subagent. Ten má vlastní robustní orchestraci přes `codex-companion.mjs` helper a obejde řadu okrajových případů. Použij jen na jeden retry; pokud selže i tak, přepni na jiného providera (Gemini nebo Claude) a poznač to v sekci *Nejistoty* finální odpovědi.
 
+**DŮLEŽITÉ: spouštěné AI CLI nástroje `codex`,`gemini` a `claude` spust přímo v systému, NEPOUŠTĚJ je v bezpečném sandboxu - tam jim chybí login a nefunguji.**
+
+
 ---
 
 ## 3. Workflow
@@ -127,6 +130,11 @@ a přidej potřebný kontext, pokud je potřeba.
 ---
 
 ## 6. Rychlé vzory volání
+
+**DŮLEŽITÉ: spouštěné AI CLI nástroje `codex`,`gemini` a `claude` spust přímo v systému, NEPOUŠTĚJ je v bezpečném sandboxu - tam jim chybí login a nefunguji.**
+
+**Pozn.:** Spuštěná instance běží nezávisle na aktuální session — kontrolující AI CLI nemá tvůj kontext, dostává opravdu čerstvý pohled. Aliasy (`opus`, `sonnet`, `haiku`) ukazují na aktuálně doporučenou verzi pro daný provider; pro reprodukovatelnost pinuj `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`.
+
 
 ### Codex / OpenAI
 
@@ -207,8 +215,6 @@ claude -p "Analyzuj [téma]. Odpověz JSONem s klíči assessment, strengths, co
   --model opus --output-format json > "$WORK/result.json"
 cat "$WORK/result.json"
 ```
-
-**Pozn.:** Spuštěná instance běží nezávisle na aktuální session — kontrolor nemá tvůj kontext, dostává opravdu čerstvý pohled. Aliasy (`opus`, `sonnet`, `haiku`) ukazují na aktuálně doporučenou verzi pro daný provider; pro reprodukovatelnost pinuj `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`.
 
 ---
 
