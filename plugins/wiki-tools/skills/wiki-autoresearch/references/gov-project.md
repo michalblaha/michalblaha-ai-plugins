@@ -57,37 +57,44 @@ Jako zdroje s vysokou mírou jistoty necitujte:
 
 ---
 ## Ukládání výsledků
-Po dokončení výzkumu vytvořte tyto stránky:
 
-**wiki/projekty/**. Jedna stránka na každý významný státní projekt nebo iniciativu
-- Použijte frontmatter typu `project` (název, zadavatel, dodavatel, hodnota, stav, období)
-- Tělo: popis projektu, kontext, klíčové milníky, finanční toky, vazby na osoby a instituce
-- Křížově odkazujte na příslušné instituce, dodavatele a osoby
+Po dokončení výzkumu vytvořte:
 
-**wiki/dodavatelé/**. Jedna stránka na každého významného dodavatele (firmu, subjekt, který obchoduje se státem)
-- Použijte frontmatter typu `entity` se `entity_type: company` (IČO, sídlo, vlastnická struktura, K-index)
-- Tělo: čím se firma zabývá, jaké zakázky získala, vazby na politicky exponované osoby
-- Nejprve zkontrolujte index: existující stránky dodavatelů aktualizujte, místo abyste vytvářeli duplikáty
+1. ZÁSADNÍ PRAVIDLO: veškeré použité zdroje stáhni a ulož do `raw/` adresáře.
 
-**wiki/instituce/**. Jedna stránka na každou významnou státní instituci (ministerstvo, úřad, agenturu, kraj, obec)
-- Použijte frontmatter typu `entity` se `entity_type: institution`
-- Tělo: působnost, vedení, podřízené organizace, vystavené zakázky, dotační programy
-- Nejprve zkontrolujte index: aktualizujte existující stránky institucí
+2. Wiki stránky — cílové složky odvoď podle sekce **Detekce uspořádání vaultu** ve skillu (`{type → složka}` mapa, případně doménově specifické rozlišení podle `entity_type` / `source_type` níže). Pro každý typ:
 
-**wiki/osoby/**. Jedna stránka na každou významnou identifikovanou osobu (politik, úředník, vlastník, lobbista)
-- Použijte frontmatter typu `entity` se `entity_type: person` (role, funkce, období, afiliace)
-- Tělo: životopis ve vztahu k tématu, funkce, vazby na firmy a instituce, sponzorské dary
-- Nejprve zkontrolujte index: aktualizujte existující stránky osob
+   - **Projekt** (`type: project`) — jedna stránka na každý významný státní projekt nebo iniciativu. Frontmatter: název, zadavatel, dodavatel, hodnota, stav, období. Tělo: popis projektu, kontext, klíčové milníky, finanční toky, vazby na osoby a instituce. Křížově odkazuj na příslušné instituce, dodavatele a osoby.
 
-**wiki/media/**. Jedna stránka na každý významný mediální zdroj (médium, redakci, novináře)
-- Použijte frontmatter typu `source` se `source_type: media` (název, autor, datum, URL)
-- Tělo: shrnutí zjištění, kterých kauz se médium dotklo, hodnocení důvěryhodnosti
-- Použijte tuto složku pro průběžné mediální zdroje; pro jednorázové články používejte standardní `wiki/sources/`
+   - **Dodavatel** (`type: entity`, `entity_type: company`) — jedna stránka na každého významného dodavatele (firmu obchodující se státem). Frontmatter: IČO, sídlo, vlastnická struktura, K-index. Tělo: čím se firma zabývá, jaké zakázky získala, vazby na politicky exponované osoby. Před založením zkontroluj rejstřík; aktualizuj existující.
 
-**wiki/otazky/**. Jedna syntetizující stránka s názvem „Research: [Topic]"
-- Toto je hlavní syntéza. Všechno se zde sbíhá dohromady.
-- Sekce: Overview, Key Findings, Entities, Concepts, Contradictions, Open Questions, Sources
-- Plný frontmatter s `related` odkazy na všechny stránky vytvořené v této relaci
+   - **Instituce** (`type: entity`, `entity_type: institution`) — jedna stránka na každou významnou státní instituci (ministerstvo, úřad, agentura, kraj, obec). Tělo: působnost, vedení, podřízené organizace, vystavené zakázky, dotační programy. Před založením zkontroluj rejstřík.
+
+   - **Osoba** (`type: entity`, `entity_type: person`) — jedna stránka na každou významnou identifikovanou osobu (politik, úředník, vlastník, lobbista). Frontmatter: role, funkce, období, afiliace. Tělo: životopis ve vztahu k tématu, funkce, vazby na firmy a instituce, sponzorské dary. Před založením zkontroluj rejstřík.
+
+   - **Médium** (`type: source`, `source_type: media`) — jedna stránka na každý významný mediální zdroj (médium, redakci, novináře). Frontmatter: název, autor, datum, URL. Tělo: shrnutí zjištění, kterých kauz se médium dotklo, hodnocení důvěryhodnosti. Tato kategorie se používá pro průběžně sledované mediální zdroje; jednorázové články jdou jako běžný `type: source`.
+
+   - **Syntéza** (`type: synthesis`) — jedna hlavní stránka „Research: [Topic]". Sekce: Overview, Key Findings, Entities, Concepts, Contradictions, Open Questions, Sources. Plný frontmatter s `related` odkazy na všechny stránky vytvořené v této relaci.
+
+---
+
+## Fallback uspořádání
+
+Použít pouze pokud ve vaultu zatím pro daný typ neexistuje žádná stránka (viz sekce „Detekce uspořádání vaultu" ve skillu). Pro doménově specifické sub-typy je rozlišovacím klíčem dvojice (`type`, `entity_type`/`source_type`):
+
+| Typ / sub-typ                                | Fallback složka      |
+|----------------------------------------------|----------------------|
+| `project`                                    | `wiki/projekty/`     |
+| `entity` + `entity_type: company`            | `wiki/dodavatelé/`   |
+| `entity` + `entity_type: institution`        | `wiki/instituce/`    |
+| `entity` + `entity_type: person`             | `wiki/osoby/`        |
+| `entity` (ostatní)                           | `wiki/entity/`       |
+| `source` + `source_type: media`              | `wiki/media/`        |
+| `source` (ostatní)                           | `wiki/zdroje/`       |
+| `concept`                                    | `wiki/myslenky/`     |
+| `synthesis`                                  | `wiki/otazky/`       |
+
+Pokud má vault preferovanou jinou konvenci, detekce ji použije automaticky.
 
 
 

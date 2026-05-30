@@ -67,28 +67,34 @@ Pro lékařský a zdravotnický výzkum:
 ---
 ## Ukládání výsledků
 
-Po dokončení rešerše vytvořte tyto stránky:
+Po dokončení rešerše vytvořte:
 
-**wiki/zdroje/**. Jedna stránka pro každý nalezený významný zdroj
+1. ZÁSADNÍ PRAVIDLO: veškeré použité zdroje stáhni a ulož do `raw/` adresáře.
 
-Použijte frontmatter zdroje (type, source_type, author, date_published, url, confidence, key_claims)
-Tělo: shrnutí zdroje, čím přispívá k tématu
+2. Wiki stránky — cílové složky odvoď podle sekce **Detekce uspořádání vaultu** ve skillu (`{type → složka}` mapa). Pro každý typ:
 
-wiki/myslenky/**. Jedna stránka pro každý extrahovaný významný koncept
+   - **Zdroj** (`type: source`) — jedna stránka pro každý významný nalezený zdroj. Použijte frontmatter zdroje (type, source_type, author, date_published, url, confidence, key_claims). Tělo: shrnutí zdroje, čím přispívá k tématu.
 
-Stránku vytvořte pouze tehdy, je-li koncept dostatečně samostatný
-Nejprve zkontrolujte index: namísto vytváření duplicit aktualizujte stávající stránky konceptů
+   - **Koncept** (`type: concept`) — jedna stránka pro každý samostatný extrahovaný koncept. Před založením zkontrolujte rejstřík; nestavějte duplicity, aktualizujte stávající stránky.
 
-wiki/entity/**. Jedna stránka pro každou identifikovanou významnou osobu, organizaci nebo produkt
+   - **Entita** (`type: entity`) — jedna stránka pro každou významnou identifikovanou osobu, organizaci nebo produkt. Před založením zkontrolujte rejstřík.
 
-Nejprve zkontrolujte index: aktualizujte stávající stránky entit
+   - **Syntéza** (`type: synthesis`) — jedna hlavní stránka „Research: [Topic]". Sekce: Overview (Přehled), Key Findings (Klíčová zjištění), Entities (Entity), Concepts (Koncepty), Contradictions (Rozpory), Open Questions (Otevřené otázky), Sources (Zdroje). Kompletní frontmatter s odkazy na všechny stránky vytvořené v této relaci.
 
-wiki/reserse/**. Jedna syntetická stránka s názvem „Research: [Topic]"
+---
 
-Toto je hlavní syntéza. Vše se zde sbíhá dohromady.
+## Fallback uspořádání
 
-Sekce: Overview (Přehled), Key Findings (Klíčová zjištění), Entities (Entity), Concepts (Koncepty), Contradictions (Rozpory), Open Questions (Otevřené otázky), Sources (Zdroje)
-Kompletní frontmatter s odkazy na všechny stránky vytvořené v této relaci
+Použít pouze pokud ve vaultu zatím pro daný typ neexistuje žádná stránka (viz sekce „Detekce uspořádání vaultu" ve skillu):
+
+| Typ        | Fallback složka     |
+|------------|---------------------|
+| source     | `wiki/zdroje/`      |
+| concept    | `wiki/myslenky/`    |
+| entity     | `wiki/entity/`      |
+| synthesis  | `wiki/reserse/`     |
+
+Pokud má vault preferovanou jinou konvenci (např. anglické názvy `wiki/sources/`, `wiki/concepts/`, `wiki/entities/`, `wiki/research/`), detekce ji použije automaticky.
 
 ---
 

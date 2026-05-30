@@ -57,6 +57,23 @@ Max kol: 4 (jak je nastaveno v profilu). Skonči, když je dosažena hloubka neb
 
 ---
 
+## Detekce uspořádání vaultu
+
+Než cokoli založíš, zmapuj, kam tato konkrétní wiki ukládá podobné stránky. Cílové složky neber z hardcoded cest — odvoď je z obsahu vaultu.
+
+Postup:
+
+1. Přečti `wiki/index.md` a zjisti, jaké top-level složky pod `wiki/` existují.
+2. Pro každý cílový typ stránky (`source`, `entity`, `concept`, `synthesis`, případně další typy deklarované v profilu) najdi existující stránky stejného `type:` přes Grep frontmatteru (`grep -l "^type: <typ>"`) a spočítej, ve které složce jich je nejvíc. Tu zvol jako kanonickou cílovou složku pro daný typ v této wiki.
+3. Pokud pro daný typ neexistuje **žádná** stránka, použij fallback z aktivního profilu (`references/<profile>.md`, sekce „Fallback uspořádání"). Pokud ani profil žádný fallback nedeklaruje, použij anglické výchozí složky: `wiki/sources/`, `wiki/entities/`, `wiki/concepts/`, `wiki/research/`.
+4. Pokud existuje více plausibilních složek (např. `wiki/entities/` i `wiki/lide/`), zvol tu s vyšším počtem výskytů. Při remíze preferuj kratší cestu a poznamenej rozhodnutí do logu.
+5. Diskriminátor je `type:` ve frontmatteru, ne název složky. Stejný typ se mapuje na jednu složku, i kdyby v ní byly stránky pojmenované různě. Pokud profil definuje sub-typy (např. `entity_type: company` / `institution` / `person`, nebo `source_type: media`), použij jako klíč dvojici (`type`, sub-typ) — pro každou takovou kombinaci detekuj složku samostatně.
+6. Uloženou mapu `{(type[, sub-typ]) → složka}` použij konzistentně pro celou relaci.
+
+Pravidlo: nevytvářej novou top-level složku, pokud už pro daný typ v této wiki existuje konvence. Konzistenci preferuj před profilem.
+
+---
+
 ## Struktura syntézní stránky
 
 ```markdown
@@ -72,9 +89,11 @@ status: developing
 related:
   - "[[Every page created in this session]]"
 sources:
-  - "[[wiki/sources/Source 1]]"
-  - "[[wiki/sources/Source 2]]"
+  - "[[<source-folder>/Source 1]]"
+  - "[[<source-folder>/Source 2]]"
 ---
+
+> Konkrétní cesty (`<source-folder>` atd.) doplň podle mapy `{type → složka}` zjištěné v sekci „Detekce uspořádání vaultu".
 
 # Research: [Topic]
 
@@ -132,11 +151,11 @@ Research complete: [Topic]
 
 Rounds: N | Searches: N | Pages created: N
 
-Created:
-  wiki/questions/Research: [Topic].md (synthesis)
-  wiki/sources/[Source 1].md
-  wiki/concepts/[Concept 1].md
-  wiki/entities/[Entity 1].md
+Created (paths reflect detected vault layout):
+  <synthesis-folder>/Research: [Topic].md
+  <source-folder>/[Source 1].md
+  <concept-folder>/[Concept 1].md
+  <entity-folder>/[Entity 1].md
 
 Key findings:
 - [Finding 1]
