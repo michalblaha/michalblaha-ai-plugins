@@ -1,6 +1,6 @@
 {
   "name": "wiki-tools",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Trvalá kumulující se znalostní báze pro Codex + Obsidian. Ingest zdrojů, dotazy s citacemi, autonomní výzkum a health check vaultu podle vzoru LLM Wiki od Andreje Karpathyho.",
   "author": {
     "name": "Michal Bláha",

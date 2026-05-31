@@ -27,7 +27,8 @@ Projdi je v tomto pořadí:
 6. **Mezery ve frontmatter**. Stránky bez povinných polí (type, status, created, updated, tags).
 7. **Prázdné sekce**. Nadpisy bez obsahu.
 8. **Zastaralé záznamy v rejstříku**. Položky v `wiki/index.md` odkazující na přejmenované nebo smazané stránky.
-
+9. **Validní md formát** Zkontroluj validity Markdown souborů, zejména escapování pipe v aliasech wikilinků uvnitř tabulky. V tom Obsidian dělá chyby.
+10. **Vytvoř nebo updatuj Executive summary stranku**
 ---
 
 ## Formát lint reportu
@@ -171,3 +172,7 @@ Vyžaduje kontrolu před opravou:
 - Mazání orphan stránek (mohou být záměrně izolované)
 - Řešení rozporů (vyžaduje lidský úsudek)
 - Sloučení duplicitních stránek
+
+## Executive summary
+
+Vytvoř nebo updatuj Executive summary s nejdůležitějšími poznatky a závěry z wiki. Tato stránka má dát komplexní přehled o problematice a nalezených zjištěních. Stránku Executive summary prolinkuj z úvodní části @wiki/index.md

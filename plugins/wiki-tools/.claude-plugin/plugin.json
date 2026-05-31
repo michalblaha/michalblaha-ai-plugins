@@ -1,7 +1,7 @@
 {
   "name": "wiki-tools",
   "description": "Trvalá kumulující se znalostní báze pro Claude + Obsidian. Ingest zdrojů, dotazy s citacemi, autonomní výzkum a health check vaultu podle vzoru LLM Wiki od Andreje Karpathyho.",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "author": {
     "name": "Michal Bláha",
     "email": "michal+ai-plugins@michalblaha.cz"
