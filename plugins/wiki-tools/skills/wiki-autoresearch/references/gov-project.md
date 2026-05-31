@@ -18,6 +18,10 @@ U každého tvrzení při ukládání označte míru jistoty:
 - **medium**: jeden dobrý zdroj, nebo částečná shoda zdrojů
 - **low**: spekulace, názorový text, jeden neformální zdroj nebo neověřené tvrzení
 
+**Zápis míry jistoty:**
+- Inline u každého tvrzení vždy doslova ve tvaru `míra jistoty: low|medium|high` (ne holé `(high)`, ne `confidence:`, ne česká synonyma vysoká/střední/nízká). Umísti do citační závorky, např. `(Source: Hlídač státu — míra jistoty: high)`.
+- Každá stránka s frontmatterem nese navíc pole **`confidence_overall: low|medium|high`** (hned za `status:`) = převažující jistota hlavních zjištění stránky (ne striktní minimum). Slouží k filtrování v Dataview. Po ověření silnějším zdrojem hodnotu zvyš a zaznamenej do `wiki/log.md`.
+
 U faktických tvrzení vždy uvádějte datum zdroje. Tvrzení ze zdrojů starších než 3 roky označte jako potenciálně zastaralá.
 
 ---

@@ -8,6 +8,7 @@ updated: <% tp.date.now("YYYY-MM-DD") %>
 tags:
   - question
 status: developing
+confidence_overall: medium  # low|medium|high — převažující jistota hlavních zjištění
 related: []
 sources: []
 ---

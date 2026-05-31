@@ -86,6 +86,7 @@ tags:
   - research
   - [topic-tag]
 status: developing
+confidence_overall: high   # low|medium|high — převažující jistota hlavních zjištění stránky
 related:
   - "[[Every page created in this session]]"
 sources:

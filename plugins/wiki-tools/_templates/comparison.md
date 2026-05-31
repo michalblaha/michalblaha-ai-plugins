@@ -13,6 +13,7 @@ updated: <% tp.date.now("YYYY-MM-DD") %>
 tags:
   - comparison
 status: seed
+confidence_overall: medium  # low|medium|high — převažující jistota hlavních zjištění
 related: []
 sources: []
 ---

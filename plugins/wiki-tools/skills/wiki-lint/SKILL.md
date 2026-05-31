@@ -24,7 +24,7 @@ Projdi je v tomto pořadí:
 3. **Zastaralá tvrzení (stale claims)**. Tvrzení na starších stránkách, která novější zdroje vyvrátily nebo aktualizovaly.
 4. **Chybějící stránky**. Koncepty nebo entity zmiňované na více stránkách, které nemají vlastní stránku.
 5. **Chybějící křížové reference**. Entity zmíněné na stránce, ale nelinkované.
-6. **Mezery ve frontmatter**. Stránky bez povinných polí (type, status, created, updated, tags).
+6. **Mezery ve frontmatter**. Stránky bez povinných polí (type, status, **confidence_overall**, created, updated, tags) nebo s neplatnou hodnotou `confidence_overall` (musí být low|medium|high).
 7. **Prázdné sekce**. Nadpisy bez obsahu.
 8. **Zastaralé záznamy v rejstříku**. Položky v `wiki/index.md` odkazující na přejmenované nebo smazané stránky.
 9. **Validní md formát** Zkontroluj validity Markdown souborů, zejména escapování pipe v aliasech wikilinků uvnitř tabulky. V tom Obsidian dělá chyby.
@@ -63,7 +63,7 @@ status: developing
 - "concept name": zmíněno v [[Page A]], [[Page B]], [[Page C]]. Návrh: vytvořit konceptovou stránku.
 
 ## Frontmatter Gaps
-- [[Page Name]]: chybí pole: status, tags
+- [[Page Name]]: chybí pole: status, tags, confidence_overall
 
 ## Stale Claims
 - [[Page Name]]: tvrzení „X" může být v rozporu s novějším zdrojem [[Newer Source]].

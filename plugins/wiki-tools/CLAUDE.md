@@ -81,6 +81,7 @@ updated: YYYY-MM-DD
 tags:
   - <tag>
 status: seed | developing | solid
+confidence_overall: low | medium | high
 related:
   - "[[Related Page]]"
 sources:
@@ -109,6 +110,49 @@ Související koncepty propojuj pomocí `[[wikilinks]]`.
 - Každé faktické tvrzení opatři odkazem na zdroj — formát `(Source: [[Zdrojová stránka]])`
 - Když si dva zdroje protiřečí, označ rozpor explicitně calloutem `> [!contradiction]`
 - Tvrzení bez ověřeného zdroje označ calloutem `> [!gap] Vyžaduje ověření.`
+- Míru jistoty každého tvrzení uváděj inline ve tvaru `míra jistoty: low|medium|high` (viz sekce „Míra jistoty (confidence)" níže).
+
+## Míra jistoty (confidence)
+
+Každé netriviální tvrzení nese explicitní míru jistoty, vždy doslova ve tvaru:
+
+```
+míra jistoty: low | medium | high
+```
+
+- **high** — shoduje se více nezávislých autoritativních zdrojů, nebo ověřeno přímo proti primárnímu zdroji (oficiální rejstřík, plný text dokumentu, primární databáze).
+- **medium** — jeden dobrý zdroj, částečná shoda zdrojů, nebo OCR/odvozený úryvek dosud nepotvrzený v primárním dokumentu.
+- **low** — spekulace, názor, jeden neformální zdroj nebo neověřené tvrzení.
+
+Pravidla:
+
+- Vždy doslovná fráze `míra jistoty: <úroveň>` — nikdy holé `(high)`, `— medium`, anglické `confidence:` ani česká synonyma vysoká/střední/nízká.
+- Umísti do citační závorky vedle zdroje, např. `(Source: [[Zdroj]] — míra jistoty: high)`, nebo samostatně za tvrzení `(míra jistoty: medium)`.
+- Jedna stránka může míchat úrovně; znač každé tvrzení zvlášť, nehodnoť celou stránku jednou inline značkou.
+- Po potvrzení silnějším zdrojem úroveň zvyš a změnu zaznamenej do `wiki/log.md`.
+- Pro skutečně neověřené mezery použij callout `> [!gap] Vyžaduje ověření.` navíc k (nebo místo) značky low.
+
+### Pole `confidence_overall` (pro Dataview)
+
+Každá stránka s YAML frontmatterem nese navíc pole:
+
+```yaml
+confidence_overall: low | medium | high
+```
+
+- Vyjadřuje **převažující jistotu hlavních zjištění stránky** — ne striktní minimum. Stránka, jejíž ústřední teze stojí na nedoloženém/neověřeném tvrzení, je `medium` (či `low`), i když okrajová fakta jsou `high`; stránka s dobře doloženými hlavními zjištěními je `high`, i když nese drobné `medium` výhrady.
+- Umísti hned za `status:` ve frontmatteru.
+- Drž konzistentní s inline značkami `míra jistoty:` — je-li klíčové tvrzení inline `medium`, stránka není `high`.
+- Přehodnoť při každé změně inline značek (např. po ověření proti primárnímu zdroji).
+- Navigační/provozní stránky bez frontmatteru (`index.md`, `hot.md`, `log.md`) toto pole nemají.
+
+Příklad Dataview — stránky vyžadující doověření:
+
+```dataview
+TABLE confidence_overall, status
+WHERE confidence_overall != "high"
+SORT confidence_overall ASC
+```
 
 ## Konvence pojmenování
 
