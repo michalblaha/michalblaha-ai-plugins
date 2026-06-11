@@ -70,12 +70,17 @@ codex plugin marketplace remove michalblaha-ai-plugins
 
 ### Naklonovat jako Obsidian vault (jen pro wiki-tools)
 
-```bash
-git clone https://github.com/michalblaha/michalblaha-ai-plugins
-cd michalblaha-ai-plugins
+V claude:
+```
+/wiki-tools:wiki-create 
 ```
 
-Otevřete složku `plugins/wiki-tools/` v Obsidianu: **Manage Vaults → Open folder as vault**. Otevřete Claude Code ve stejné složce a popište záměr (např. „nastav mi wiki pro výzkum státních zakázek").
+V Codex:
+```
+$wiki-tools:wiki-create 
+```
+
+Otevřete stejný adresář v Obsidianu: **Manage Vaults → Open folder as vault**. 
 
 ---
 
