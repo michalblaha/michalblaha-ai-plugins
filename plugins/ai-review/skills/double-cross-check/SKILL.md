@@ -1,6 +1,9 @@
 ---
 name: double-cross-check
-description: "Ověř výsledek nezávislým modelem od jiného providera — Codex (OpenAI), Gemini (Google) nebo Claude Code (Anthropic). Použij na fráze: 'získej druhý názor', 'ověř z jiného modelu', 'zkontroluj přes Codex/Gemini/Claude Code', 'porovnej názory modelů', 'cross-check', 'dvojitá kontrola', 'fact-check', 'ověř fakta'. Vhodné pro ověřování faktografických dat a investigativní rešerše, kontrolu architektonických rozhodnutí, bezpečnostní audit kódu, porovnávání implementačních přístupů a multi-model konsenzus u rozhodnutí s vyššími stakes. Pro běžný dotaz, kde stačí jedna odpověď, skill nepoužívej — je drahý a pomalý. Používej cíleně."
+description: "Ověř výsledek nezávislým modelem od jiného providera — Codex (OpenAI), Antigravity / agy (Google) nebo Claude Code (Anthropic). Použij na fráze: 'získej druhý názor', 'ověř z jiného modelu', 'zkontroluj přes Codex/Antigravity/Claude Code', 'porovnej názory modelů', 'cross-check', 'dvojitá kontrola', 'fact-check', 'ověř fakta'. Vhodné pro ověřování faktografických dat a investigativní rešerše, kontrolu architektonických rozhodnutí, bezpečnostní audit kódu, porovnávání implementačních přístupů a multi-model konsenzus u rozhodnutí s vyššími stakes. Pro běžný dotaz, kde stačí jedna odpověď, skill nepoužívej — je drahý a pomalý. Používej cíleně."
+
+model: sonnet
+effort: high
 
 allowed-tools:
   - AskUserQuestion
@@ -12,7 +15,10 @@ allowed-tools:
   - Bash(command -v *)
   - Bash(codex exec:*)
   - Bash(claude -p:*)
-  - Bash(gemini -p:*)
+  - Bash(agy -p:*)
+  - Bash(agy --print:*)
+  - Bash(agy --prompt:*)
+  - Bash(agy models:*)
   - Bash(mktemp:*)
   - Bash(mkdir:*)
   - Bash(cat:*)
@@ -27,7 +33,7 @@ argument-hint: "otázka / soubor / rozhodnutí k ověření"
 
 # Double cross-check: kontrola jiným AI modelem
 
-Získej nezávislý pohled od OpenAI (přes Codex CLI), Google (přes Gemini CLI) nebo Anthropic (přes Claude Code CLI) na výsledek, který sám/sama produkuješ. Smysl: chytit chyby, na které jsi slepý/á — ne potvrdit si vlastní odpověď.
+Získej nezávislý pohled od OpenAI (přes Codex CLI), Google (přes Antigravity CLI — `agy`) nebo Anthropic (přes Claude Code CLI) na výsledek, který sám/sama produkuješ. Smysl: chytit chyby, na které jsi slepý/á — ne potvrdit si vlastní odpověď.
 
 ---
 
@@ -35,29 +41,31 @@ Získej nezávislý pohled od OpenAI (přes Codex CLI), Google (přes Gemini CLI
 
 Než začneš, urči, který model skill právě spouští, podle prostředí (system prompt, název CLI, autentizační kontext). Ověřovatele vybírej **z těch zbývajících**:
 
-- Pokud jsi **Claude** → ověřuje **Codex** a/nebo **Gemini**.
-- Pokud jsi **GPT/Codex** → ověřuje **Claude** a/nebo **Gemini**.
+- Pokud jsi **Claude** → ověřuje **Codex** a/nebo **agy** (s Gemini modelem).
+- Pokud jsi **GPT/Codex** → ověřuje **Claude** a/nebo **agy** (s Gemini modelem).
 - Pokud jsi **Gemini** → ověřuje **Codex** a/nebo **Claude**.
 
-Nikdy se neověřuj stejným modelem, který odpověď vyrobil — sdílí stejné slabiny.
+Nikdy se neověřuj stejným modelem, který odpověď vyrobil — sdílí stejné slabiny. Pozn.: `agy` hostí kromě Gemini i Claude a GPT-OSS modely. Pro účel cross-checku ho používej výhradně s `Gemini …` modelem (jinak ztrácíš nezávislost rodiny).
 
 ---
 
 ## 2. Předpoklady prostředí
 
-Skill předpokládá shellové prostředí s nainstalovanými relevantními CLI nástroji (typicky lokální stroj s Claude Code, Codex CLI nebo Gemini CLI). **V prostředí bez shellu** (čistý chat bez bash toolu) skill nelze použít — místo něj nabídni uživateli, ať verifikační prompt pošle do jiného modelu ručně, nebo použij web search pro grounding faktů.
+Skill předpokládá shellové prostředí s nainstalovanými relevantními CLI nástroji (typicky lokální stroj s Claude Code, Codex CLI nebo Antigravity CLI `agy`). **V prostředí bez shellu** (čistý chat bez bash toolu) skill nelze použít — místo něj nabídni uživateli, ať verifikační prompt pošle do jiného modelu ručně, nebo použij web search pro grounding faktů.
 
 Než začneš, ověř dostupnost:
 
 ```bash
 codex --version  || echo "Codex CLI není nainstalované"
-gemini --version || echo "Gemini CLI není nainstalované"
+command -v agy >/dev/null && agy models >/dev/null 2>&1 \
+  && echo "Antigravity (agy) OK" \
+  || echo "Antigravity CLI (agy) není nainstalované nebo není nakonfigurované"
 claude --version || echo "Claude Code CLI není nainstalované"
 ```
 
 **Autentizace:**
 - **Codex:** `codex login` nebo env var `OPENAI_API_KEY`
-- **Gemini:** Google OAuth nebo env var `GEMINI_API_KEY`
+- **Antigravity (agy):** první nastavení `agy install` (PATH + shell aliases) a přihlášení dle pokynů na <https://antigravity.google/docs/cli-reference>
 - **Claude Code:** `claude login` nebo env var `ANTHROPIC_API_KEY`
 
 **Workdir:** všechny příklady níže používají `WORK=$(mktemp -d)` na začátku a pak `$WORK/...` pro mezivýstupy. Vyhne se to kolizím při paralelním běhu a uklidí to po sobě (na rozdíl od pevného `/tmp/claude/`).
@@ -66,7 +74,7 @@ claude --version || echo "Claude Code CLI není nainstalované"
 
 **Fallback při selhání volání Codexu:** Pokud `codex exec` přesto selže (timeout, autentizační problém, runtime error), zkus delegovat ověření na `codex:codex-rescue` skill / subagent. Ten má vlastní robustní orchestraci přes `codex-companion.mjs` helper a obejde řadu okrajových případů. Použij jen na jeden retry; pokud selže i tak, přepni na jiného providera (Gemini nebo Claude) a poznač to v sekci *Nejistoty* finální odpovědi.
 
-**DŮLEŽITÉ: spouštěné AI CLI nástroje `codex`,`gemini` a `claude` spusť přímo v systému, NEPOUŠTĚJ je v bezpečném sandboxu - tam jim chybí login a nefunguji.**
+**DŮLEŽITÉ: spouštěné AI CLI nástroje `codex`, `agy` a `claude` spusť přímo v systému, NEPOUŠTĚJ je v bezpečném sandboxu — tam jim chybí login a nefungují.**
 
 
 ---
@@ -136,7 +144,7 @@ a přidej potřebný kontext, pokud je potřeba.
 
 ## 6. Rychlé vzory volání
 
-**DŮLEŽITÉ: spouštěné AI CLI nástroje `codex`,`gemini` a `claude` spust přímo v systému, NEPOUŠTĚJ je v bezpečném sandboxu - tam jim chybí login a nefunguji.**
+**DŮLEŽITÉ: spouštěné AI CLI nástroje `codex`, `agy` a `claude` spusť přímo v systému, NEPOUŠTĚJ je v bezpečném sandboxu — tam jim chybí login a nefungují.**
 
 **Pozn.:** Spuštěná instance běží nezávisle na aktuální session — kontrolující AI CLI nemá tvůj kontext, dostává opravdu čerstvý pohled. Aliasy (`opus`, `sonnet`, `haiku`) ukazují na aktuálně doporučenou verzi pro daný provider; pro reprodukovatelnost pinuj `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`.
 
@@ -178,26 +186,30 @@ cat "$WORK/result.json"
 
 **Pozn. k `--skip-git-repo-check`:** flag je povinný pro každé volání Codexu z tohoto skillu (viz sekce 2). Pokud volání i s ním selže, fallback je delegace na `codex:codex-rescue`.
 
-### Gemini / Google
+### Antigravity / agy (Google)
 
 ```bash
 WORK=$(mktemp -d)
 
-# Jednoduchá otázka — auto-routing vybere model
-gemini --skip-trust -p "Tvá otázka tady" --output-format text > "$WORK/answer.txt"
+# Jednoduchá otázka s Gemini 3.1 Pro
+agy -p "Tvá otázka tady" --model "Gemini 3.1 Pro (High)" > "$WORK/answer.txt"
 cat "$WORK/answer.txt"
 
-# Explicitní výběr modelu
-gemini -m gemini-3-pro -p "Tvá otázka tady" \
-  --output-format text > "$WORK/answer.txt"
+# Rychlejší / levnější Flash
+agy -p "Tvá otázka tady" --model "Gemini 3.5 Flash (High)" > "$WORK/answer.txt"
 
-# JSON výstup (bez schema validace)
-gemini --skip-trust -p "Analyzuj [téma]. Odpověz JSONem s klíči assessment (string), strengths (array), concerns (array), recommendation (string)." \
-  --output-format json > "$WORK/result.json"
+# JSON výstup (bez schema validace — tvar vynucuj v promptu)
+agy -p "Analyzuj [téma]. Odpověz JSONem s klíči assessment (string), strengths (array), concerns (array), recommendation (string). Vrať POUZE JSON objekt, žádný okolní text." \
+  --model "Gemini 3.1 Pro (High)" > "$WORK/result.json"
 cat "$WORK/result.json"
+
+# Volitelně: workspace pro grounding nad konkrétními soubory
+agy -p "Reviewuj architekturu projektu." \
+  --add-dir "$PWD/src" \
+  --model "Gemini 3.1 Pro (High)" > "$WORK/answer.txt"
 ```
 
-**Pozn.:** Gemini CLI nepodporuje validaci JSON Schema. Pro přísně strukturovaný výstup s validací sáhni po Codexu s `--output-schema`.
+**Pozn.:** `agy` nemá `--output-format` flag — výstup je vždy raw text na stdout. JSON tvar vynucuj v promptu. Pro přísně strukturovaný výstup s validací sáhni po Codexu s `--output-schema`. Názvy modelů obsahují mezery a závorky, je nutné dvojité uvozovky (`--model "Gemini 3.1 Pro (High)"`). Aktuální seznam dostupných modelů: `agy models`.
 
 ### Claude Code / Anthropic
 
@@ -268,10 +280,10 @@ cat "$WORK/dataset_review.txt"
 
 ```bash
 WORK=$(mktemp -d)
-gemini --skip-trust -p "Posuď toto architektonické rozhodnutí: [popis].
+agy -p "Posuď toto architektonické rozhodnutí: [popis].
   Buď skeptický. Hodnoť: škálovatelnost, udržovatelnost, bezpečnostní rizika, alternativy.
   Pro každou výhradu: konkrétní scénář, kde rozhodnutí selže." \
-  --output-format text > "$WORK/arch.txt"
+  --model "Gemini 3.1 Pro (High)" > "$WORK/arch.txt"
 cat "$WORK/arch.txt"
 ```
 
@@ -308,9 +320,9 @@ cat "$WORK/review.txt"
 
 ## 8. Co dělat při neshodě modelů
 
-Když si Codex a Gemini protiřečí, neber žádný z nich za autoritu:
+Když si Codex a agy (Gemini) protiřečí, neber žádný z nich za autoritu:
 
-1. **Konkrétnější tvrzení s odkazem na zdroj > obecné tvrzení.** Pokud Codex říká "X je špatně, viz CVE-2024-1234" a Gemini říká "X je v pořádku", začni s tím konkrétním a ověř CVE.
+1. **Konkrétnější tvrzení s odkazem na zdroj > obecné tvrzení.** Pokud Codex říká "X je špatně, viz CVE-2024-1234" a agy říká "X je v pořádku", začni s tím konkrétním a ověř CVE.
 2. **Pro fakta zvol nezávislý zdroj** (web search, dokumentace, registry) místo třetího modelu — modely sdílejí halucinace, takže "tie-breaker" třetím modelem je iluze nezávislosti.
 3. **Pro názory a preference** (např. "Redis vs PostgreSQL pro session storage") neshoda často odráží reálný trade-off, ne chybu. Surface obě perspektivy uživateli s tím, na čem rozhodnutí závisí.
 4. **Pokud spor zůstává nerozhodnutý**, přiznej to v odpovědi explicitně — neforsírovej falešný konsenzus.
@@ -323,7 +335,7 @@ Multi-model cross-check není zadarmo. Reasoning modely na high/xhigh effort bě
 
 - **Single cross-check** (jeden další model): default pro většinu kontrol.
 - **Multi-model konsenzus** (všechny tři): nech si na rozhodnutí, kde stojí čas a peníze za to — publikovatelný výstup, faktografická tvrzení v investigativním materiálu, bezpečnostně-citlivý kód, architektonické rozhodnutí s dlouhodobým dopadem.
-- **Levnější tier pro rychlé checky:** `gpt-5.4-mini`, `gemini-3-flash`, `claude-haiku-4-5-20251001`.
+- **Levnější tier pro rychlé checky:** `gpt-5.4-mini`, `"Gemini 3.5 Flash (High)"` (agy), `claude-haiku-4-5-20251001`.
 
 V Claude Code se vyplatí omezit `--max-turns` (default je bez limitu) a případně `--max-budget-usd`, aby ti neutekly náklady při delší smyčce.
 
@@ -343,16 +355,24 @@ V Claude Code se vyplatí omezit `--max-turns` (default je bez limitu) a přípa
 | `--output-last-message file.txt` | Uložení odpovědi do souboru |
 | `-i image.png` | Přidání obrázku k analýze |
 
-### Gemini CLI
+### Antigravity (agy) CLI
 
 | Volba | Účel |
 |---|---|
-| Auto-routing (default) | CLI sám volí mezi Pro/Flash dle složitosti |
-| `-m gemini-3-pro` | Explicitně Gemini 3 Pro |
-| `-m gemini-3-flash` | Explicitně Gemini 3 Flash (rychlejší, levnější) |
-| `-m gemini-3.1-pro-preview` | Nejnovější preview (vyžaduje Pro/Ultra účet) |
-| `-p "prompt"` | Neinteraktivní režim (povinné pro skripty) |
-| `--output-format text\|json` | Formát výstupu (JSON bez schema validace) |
+| `--model "Gemini 3.1 Pro (High)"` | Nejlepší Gemini reasoning (uvozovky kvůli mezerám) |
+| `--model "Gemini 3.1 Pro (Low)"` | Rychlejší Gemini Pro |
+| `--model "Gemini 3.5 Flash (High)"` | Rychlejší a levnější Gemini Flash |
+| `--model "Gemini 3.5 Flash (Medium\|Low)"` | Další varianty Flash modelu |
+| `--model "Claude Opus 4.6 (Thinking)"` | Anthropic přes agy (pro cross-check **nepoužívej** mimo provozní zájem) |
+| `--model "GPT-OSS 120B (Medium)"` | Open-source GPT-OSS model |
+| `-p "prompt"` / `--print` / `--prompt` | Neinteraktivní print mode (povinné pro skripty) |
+| `--print-timeout 5m` | Timeout pro print mode (default 5m) |
+| `--add-dir <path>` | Přidá adresář do workspace (repeatable) — užitečné pro grounding nad reálnými soubory |
+| `--dangerously-skip-permissions` | Auto-approve tool permission promptů (vhodné jen pro neinteraktivní skripty) |
+| `agy models` | Vypíše seznam dostupných modelů |
+| `agy install` | První nastavení (PATH, shell aliases) — viz <https://antigravity.google/docs/cli-reference> |
+
+**Pozn.:** `agy` nemá `--output-format` flag — výstup je raw text na stdout. JSON vynucuj v promptu. Pro nezávislost rodiny modelů volej `agy` výhradně s `Gemini …` modelem (jinak ztrácíš smysl cross-checku).
 
 ### Claude Code CLI
 
@@ -373,13 +393,13 @@ V Claude Code se vyplatí omezit `--max-turns` (default je bez limitu) a přípa
 
 ## 11. Doporučení modelu podle úlohy
 
-| Úloha | Codex | Gemini | Claude Code |
+| Úloha | Codex | Antigravity / agy (Google) | Claude Code |
 |---|---|---|---|
-| Komplexní rešerše / architektura | `gpt-5.5` + xhigh | `gemini-3.1-pro-preview` nebo auto | `claude-opus-4-7` + xhigh |
-| Rychlé code review | `gpt-5.4-mini` | `gemini-3-flash` | `claude-haiku-4-5-20251001` |
-| Bezpečnostní audit (hluboký) | `gpt-5.5` + xhigh | auto-routing | `claude-opus-4-7` + xhigh |
+| Komplexní rešerše / architektura | `gpt-5.5` + xhigh | `--model "Gemini 3.1 Pro (High)"` | `claude-opus-4-7` + xhigh |
+| Rychlé code review | `gpt-5.4-mini` | `--model "Gemini 3.5 Flash (High)"` | `claude-haiku-4-5-20251001` |
+| Bezpečnostní audit (hluboký) | `gpt-5.5` + xhigh | `--model "Gemini 3.1 Pro (High)"` | `claude-opus-4-7` + xhigh |
 | Strukturovaný výstup s validací | `gpt-5.5` + `--output-schema` | — (bez schema validace) | — (bez schema validace) |
-| Faktografická verifikace | `gpt-5.5` (kombinuj se zdroji) | `gemini-3-pro` | `claude-opus-4-7` |
+| Faktografická verifikace | `gpt-5.5` (kombinuj se zdroji) | `--model "Gemini 3.1 Pro (High)"` | `claude-opus-4-7` |
 | Multi-model konsenzus | spusť všechny tři a porovnej | spusť všechny tři a porovnej | spusť všechny tři a porovnej |
 
 ---

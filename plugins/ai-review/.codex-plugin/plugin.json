@@ -1,7 +1,7 @@
 {
   "name": "ai-review",
-  "version": "1.2.4",
-  "description": "Nezávislé AI review workflows pro získání druhého názoru, cross-check a multi-model validaci napříč Claude, Codex (OpenAI) a Gemini (Google).",
+  "version": "1.3.0",
+  "description": "Nezávislé AI review workflows pro získání druhého názoru, cross-check a multi-model validaci napříč Claude, Codex (OpenAI) a Antigravity / agy (Google).",
   "author": {
     "name": "Michal Bláha",
     "email": "michal+ai-plugins@michalblaha.cz"
@@ -17,12 +17,14 @@
     "multi-model",
     "fact-check",
     "codex",
+    "antigravity",
+    "agy",
     "gemini"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "ai-review",
-    "shortDescription": "Nezávislé AI review napříč Codex, Gemini a Claude Code.",
+    "shortDescription": "Nezávislé AI review napříč Codex, Antigravity (agy) a Claude Code.",
     "longDescription": "Skills pro získání druhého názoru (second-opinion) a fact-check (double-cross-check) od jiného AI providera. Použij pro validaci architektonických rozhodnutí, kontrolu bezpečnosti kódu, ověřování faktografie nebo multi-model konsenzus u rozhodnutí s vyššími stakes.",
     "developerName": "Michal Bláha",
     "category": "Productivity",

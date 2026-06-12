@@ -1,11 +1,11 @@
 # ai-review
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.3-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue)](.claude-plugin/plugin.json)
 
-Nezávislé AI review workflows — **druhý názor** a **cross-check** napříč Claude (Anthropic), Codex (OpenAI) a Gemini (Google).
+Nezávislé AI review workflows — **druhý názor** a **cross-check** napříč Claude (Anthropic), Codex (OpenAI) a Antigravity / agy (Google).
 
-Když si Claude (nebo Codex, nebo Gemini) sám/sama validuje vlastní výstup, sdílí stejné slabiny. ai-review abstrahuje volání tří hlavních AI CLI nástrojů, takže ověřovatelem je vždy model **od jiného providera**.
+Když si Claude (nebo Codex, nebo Gemini přes agy) sám/sama validuje vlastní výstup, sdílí stejné slabiny. ai-review abstrahuje volání tří hlavních AI CLI nástrojů, takže ověřovatelem je vždy model **od jiného providera**.
 
 > Součást marketplace [`michalblaha-ai-plugins`](../../README.md). Funguje samostatně i jako companion k pluginu [`wiki-tools`](../wiki-tools/) (fact-check během ingestu, deep validace u dotazů).
 
@@ -39,7 +39,7 @@ Skill předpokládá nainstalované relevantní CLI nástroje na lokálním stro
 
 - [Claude Code CLI](https://code.claude.com/) — `claude`
 - [Codex CLI](https://github.com/openai/codex) — `codex`
-- [Gemini CLI](https://github.com/google-gemini/gemini-cli) — `gemini`
+- [Antigravity CLI](https://antigravity.google/docs/cli-reference) — `agy` (Google; hostí Gemini, Claude i GPT-OSS modely — pro nezávislost rodiny volej s `Gemini …` modelem)
 
 Stačí mít alespoň jeden cizí model dostupný (vůči tomu, který skill spouští).
 
@@ -55,7 +55,7 @@ Stačí mít alespoň jeden cizí model dostupný (vůči tomu, který skill spo
 ### Triggery
 
 - „získej druhý názor", „ověř z jiného modelu"
-- „zkontroluj přes Codex / Gemini / Claude Code"
+- „zkontroluj přes Codex / Antigravity / Claude Code"
 - „cross-check", „dvojitá kontrola", „fact-check", „ověř fakta"
 - „porovnej názory modelů"
 
@@ -65,8 +65,8 @@ Stačí mít alespoň jeden cizí model dostupný (vůči tomu, který skill spo
 
 Skill nejprve určí, který model ho právě spouští, a vybírá ověřovatele **z těch zbývajících**:
 
-- Pokud jsi **Claude** → ověřuje **Codex** a/nebo **Gemini**
-- Pokud jsi **Codex/GPT** → ověřuje **Claude** a/nebo **Gemini**
+- Pokud jsi **Claude** → ověřuje **Codex** a/nebo **agy** (s `Gemini …` modelem)
+- Pokud jsi **Codex/GPT** → ověřuje **Claude** a/nebo **agy** (s `Gemini …` modelem)
 - Pokud jsi **Gemini** → ověřuje **Codex** a/nebo **Claude**
 
 Nikdy se neověřuje stejným modelem, který odpověď vyrobil.
@@ -93,7 +93,7 @@ Integrace je volitelná — `wiki-tools` funguje plně i bez `ai-review` a wiki 
 ## Další dokumentace
 
 - [Marketplace README](../../README.md) — kompletní dokumentace všech pluginů
-- [`skills/second-opinion/SKILL.md`](skills/second-opinion/SKILL.md) — detailní bash patterny pro Codex / Gemini / Claude Code CLI
+- [`skills/second-opinion/SKILL.md`](skills/second-opinion/SKILL.md) — detailní bash patterny pro Codex / Antigravity (agy) / Claude Code CLI
 - [`skills/double-cross-check/SKILL.md`](skills/double-cross-check/SKILL.md) — workflow pro fact-check a investigativní rešerše
 
 ---

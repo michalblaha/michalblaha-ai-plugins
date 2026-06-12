@@ -1,11 +1,11 @@
 ---
 name: second-opinion
-description: "Získej druhý názor od modelů OpenAI (Codex), Google (Gemini) nebo Anthropic (Claude Code). Použij při validaci architektonických rozhodnutí, kontrole bezpečnosti kódu, porovnávání implementačních přístupů nebo když multi-model konsenzus přidá hodnotu. Podporuje všechny tři hlavní AI CLI nástroje pro maximální flexibilitu."
+description: "Získej druhý názor od modelů OpenAI (Codex), Google (Antigravity / agy) nebo Anthropic (Claude Code). Použij při validaci architektonických rozhodnutí, kontrole bezpečnosti kódu, porovnávání implementačních přístupů nebo když multi-model konsenzus přidá hodnotu. Podporuje všechny tři hlavní AI CLI nástroje pro maximální flexibilitu."
 ---
 
-# Second Opinion via Codex, Gemini & Claude Code CLI
+# Second Opinion via Codex, Antigravity & Claude Code CLI
 
-Get external AI perspective from OpenAI (via Codex CLI), Google (via Gemini CLI), or Anthropic (via Claude Code CLI) to validate decisions or compare approaches.
+Get external AI perspective from OpenAI (via Codex CLI), Google (via Antigravity CLI — `agy`), or Anthropic (via Claude Code CLI) to validate decisions or compare approaches.
 
 ## Quick Patterns
 
@@ -69,22 +69,24 @@ cat > /tmp/claude/nested_schema.json << 'EOF'
 EOF
 ```
 
-### Using Gemini (Google)
+### Using Antigravity / agy (Google)
+
+Antigravity CLI (`agy`) je Google agentní CLI s přístupem k modelům Gemini, Claude a GPT-OSS. Pro „druhý názor od Google" volej s některým z `Gemini 3.1 Pro` / `Gemini 3.5 Flash` modelů.
 
 #### Simple Question
 ```bash
-gemini --skip-trust -p "Your question here" --output-format text > /tmp/claude/answer.txt
+agy -p "Your question here" --model "Gemini 3.1 Pro (High)" > /tmp/claude/answer.txt
 cat /tmp/claude/answer.txt
 ```
 
 #### JSON Output
 ```bash
-gemini --skip-trust -p "Analyze [topic]. Respond in JSON with: assessment (string), strengths (array), concerns (array), recommendation (string)" \
-  --output-format json > /tmp/claude/result.json
+agy -p "Analyze [topic]. Respond in JSON with: assessment (string), strengths (array), concerns (array), recommendation (string). Return ONLY the JSON object, no surrounding prose." \
+  --model "Gemini 3.1 Pro (High)" > /tmp/claude/result.json
 cat /tmp/claude/result.json
 ```
 
-**Note:** Gemini CLI doesn't support JSON Schema validation like Codex. For strict structured output, use Codex with `--output-schema`.
+**Note:** `agy` nemá `--output-format` flag — výstup je vždy raw text na stdout. JSON tvar vynucuj v promptu („Return ONLY the JSON object"). Pro přísně strukturovaný výstup s validací schématu sáhni po Codexu s `--output-schema` (agy ani Claude Code schema validaci nepodporují).
 
 ### Using Claude Code (Anthropic)
 
@@ -121,11 +123,11 @@ codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort=
 cat /tmp/claude/arch.txt
 ```
 
-**Gemini:**
+**Antigravity (agy):**
 ```bash
-gemini --skip-trust -p "Review this architecture decision: [description].
+agy -p "Review this architecture decision: [description].
   Assess: scalability, maintainability, security risks, alternatives." \
-  --output-format text > /tmp/claude/arch.txt
+  --model "Gemini 3.1 Pro (High)" > /tmp/claude/arch.txt
 cat /tmp/claude/arch.txt
 ```
 
@@ -150,14 +152,14 @@ codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort=
 cat /tmp/claude/security.txt
 ```
 
-**Gemini:**
+**Antigravity (agy):**
 ```bash
-gemini --skip-trust -p "Security review of [file/code]:
+agy -p "Security review of [file/code]:
   - Input validation
   - Authentication/authorization
   - Data exposure risks
   Provide specific vulnerabilities and fixes." \
-  --output-format text > /tmp/claude/security.txt
+  --model "Gemini 3.1 Pro (High)" > /tmp/claude/security.txt
 cat /tmp/claude/security.txt
 ```
 
@@ -182,11 +184,11 @@ codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort=
 cat /tmp/claude/review.txt
 ```
 
-**Gemini:**
+**Antigravity (agy):**
 ```bash
-gemini --skip-trust -p "Review [file] for: bugs, performance issues, maintainability.
+agy -p "Review [file] for: bugs, performance issues, maintainability.
   Provide line-level recommendations." \
-  --output-format text > /tmp/claude/review.txt
+  --model "Gemini 3.1 Pro (High)" > /tmp/claude/review.txt
 cat /tmp/claude/review.txt
 ```
 
@@ -211,16 +213,23 @@ cat /tmp/claude/review.txt
 | `--output-last-message file.txt` | Save response to file |
 | `-i image.png` | Include image for analysis |
 
-### Gemini CLI Options
+### Antigravity (agy) CLI Options
 
 | Option | Purpose |
 |--------|---------|
-| `--model gemini-3-pro-preview` | Best reasoning (explicit selection) |
-| `--model gemini-3-flash-preview` | Fast and capable |
-| Auto-routing (default) | CLI selects best model automatically |
-| `--output-format text` | Plain text output |
-| `--output-format json` | JSON output (no schema validation) |
-| `-p "prompt"` | Non-interactive mode (required) |
+| `--model "Gemini 3.1 Pro (High)"` | Best Gemini reasoning (názvy modelů obsahují mezery, je nutné kvótování) |
+| `--model "Gemini 3.5 Flash (High)"` | Rychlejší a levnější Gemini |
+| `--model "Claude Opus 4.6 (Thinking)"` | Anthropic Opus přes Antigravity |
+| `--model "Claude Sonnet 4.6 (Thinking)"` | Anthropic Sonnet přes Antigravity |
+| `--model "GPT-OSS 120B (Medium)"` | Open-source GPT-OSS |
+| `-p "prompt"` / `--print` / `--prompt` | Non-interactive print mode (povinné pro skripty) |
+| `--print-timeout 5m` | Timeout pro print mode (default 5m) |
+| `--add-dir <path>` | Přidá adresář do workspace (repeatable) |
+| `--dangerously-skip-permissions` | Auto-approve všech tool permission promptů (pro non-interactive skripty) |
+| `agy models` | Vypíše seznam dostupných modelů |
+| `agy install` | První nastavení (PATH, shell aliases) |
+
+**Pozn.:** `agy` nemá `--output-format` flag. Výstup je vždy raw text na stdout. JSON tvar vynucuj v promptu. Pro schema validaci sáhni po Codexu.
 
 ### Claude Code CLI Options
 
@@ -237,22 +246,22 @@ cat /tmp/claude/review.txt
 
 ## Provider Comparison
 
-| Use Case | Codex (OpenAI) | Gemini (Google) | Claude Code (Anthropic) |
-|----------|---------------|-----------------|------------------------|
-| Complex architectural review | `gpt-5.5` | `gemini-3-pro-preview` or auto | `claude-opus-4-6` |
-| Fast code review | `o4-mini` | `gemini-3-flash-preview` or auto | `claude-haiku-4-5-20251001` |
-| Security audit (deep) | `gpt-5.5` | Auto-routing (recommended) | `claude-opus-4-6` |
+| Use Case | Codex (OpenAI) | Antigravity / agy (Google) | Claude Code (Anthropic) |
+|----------|---------------|----------------------------|------------------------|
+| Complex architectural review | `gpt-5.5` | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-6` |
+| Fast code review | `o4-mini` | `"Gemini 3.5 Flash (High)"` | `claude-haiku-4-5-20251001` |
+| Security audit (deep) | `gpt-5.5` | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-6` |
 | Structured output (schema) | `gpt-5.5` + schema | N/A (no schema support) | N/A (no schema support) |
-| Balanced quality/speed | `gpt-5.5` | Auto-routing | `claude-opus-4-6` |
+| Balanced quality/speed | `gpt-5.5` | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-6` |
 | Multi-provider consensus | All three! Run all and compare | All three! Run all and compare | All three! Run all and compare |
 
 ## Presenting Results
 
 1. Label clearly which provider was used:
    - "Second opinion (OpenAI/Codex - gpt-5.5)"
-   - "Second opinion (Google/Gemini - gemini-3-pro)"
+   - "Second opinion (Google/Antigravity - Gemini 3.1 Pro High)"
    - "Second opinion (Anthropic/Claude Code - claude-opus-4-6)"
-   - "Consensus (Codex + Gemini + Claude Code)" if using all three
+   - "Consensus (Codex + Antigravity + Claude Code)" if using all three
 2. Compare with your own analysis
 3. Highlight areas of agreement and disagreement
 4. Synthesize recommendation based on multiple perspectives
@@ -265,8 +274,8 @@ Verify CLIs are available before use:
 # Check Codex
 codex --version || echo "Codex CLI not installed"
 
-# Check Gemini
-gemini --version || echo "Gemini CLI not installed"
+# Check Antigravity (agy)
+command -v agy >/dev/null && agy models >/dev/null 2>&1 && echo "agy OK" || echo "Antigravity CLI (agy) not installed or not configured"
 
 # Check Claude Code
 claude --version || echo "Claude Code CLI not installed"
@@ -274,7 +283,7 @@ claude --version || echo "Claude Code CLI not installed"
 
 **Authentication:**
 - **Codex:** `codex login` or set `OPENAI_API_KEY` env var
-- **Gemini:** Already authenticated via Google OAuth or set `GEMINI_API_KEY` env var
+- **Antigravity (agy):** Při prvním spuštění proveď `agy install` (nastaví PATH a shell aliases) a postupuj podle pokynů přihlášení Antigravity / Google. Detaily: <https://antigravity.google/docs/cli-reference>.
 - **Claude Code:** Already authenticated via `claude login` or set `ANTHROPIC_API_KEY` env var
 
 **Codex — mandatory `--skip-git-repo-check` flag:** Every `codex exec` call from this skill **must** include `--skip-git-repo-check` (and `--ask-for-approval never` for full non-interactivity). Codex defaults to refusing to run outside a Git repository as a safety check against unintended writes to unrelated files. This skill never writes via Codex — it only consumes the response from `--output-last-message` — so the check is unnecessary and would otherwise break calls when the caller's working directory happens to be outside a repo. Without these flags, calls fail with *"not inside a Git repository"* or hang on approval prompts.
@@ -290,9 +299,9 @@ Get second opinions from all three providers and compare:
 codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' --output-last-message /tmp/claude/codex_opinion.txt \
   "Should we use Redis or PostgreSQL for session storage in e-commerce app?"
 
-# 2. Ask Gemini
-gemini --skip-trust -p "Should we use Redis or PostgreSQL for session storage in e-commerce app?" \
-  --output-format text > /tmp/claude/gemini_opinion.txt
+# 2. Ask Antigravity (agy)
+agy -p "Should we use Redis or PostgreSQL for session storage in e-commerce app?" \
+  --model "Gemini 3.1 Pro (High)" > /tmp/claude/agy_opinion.txt
 
 # 3. Ask Claude Code
 claude -p "Should we use Redis or PostgreSQL for session storage in e-commerce app?" \
@@ -301,7 +310,7 @@ claude -p "Should we use Redis or PostgreSQL for session storage in e-commerce a
 # 4. Compare outputs
 echo "=== Codex (OpenAI) ===" && cat /tmp/claude/codex_opinion.txt
 echo ""
-echo "=== Gemini (Google) ===" && cat /tmp/claude/gemini_opinion.txt
+echo "=== Antigravity / agy (Google) ===" && cat /tmp/claude/agy_opinion.txt
 echo ""
 echo "=== Claude Code (Anthropic) ===" && cat /tmp/claude/claude_opinion.txt
 ```
