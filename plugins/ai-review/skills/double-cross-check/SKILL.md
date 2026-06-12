@@ -2,9 +2,6 @@
 name: double-cross-check
 description: "Ověř výsledek nezávislým modelem od jiného providera — Codex (OpenAI), Antigravity / agy (Google) nebo Claude Code (Anthropic). Použij na fráze: 'získej druhý názor', 'ověř z jiného modelu', 'zkontroluj přes Codex/Antigravity/Claude Code', 'porovnej názory modelů', 'cross-check', 'dvojitá kontrola', 'fact-check', 'ověř fakta'. Vhodné pro ověřování faktografických dat a investigativní rešerše, kontrolu architektonických rozhodnutí, bezpečnostní audit kódu, porovnávání implementačních přístupů a multi-model konsenzus u rozhodnutí s vyššími stakes. Pro běžný dotaz, kde stačí jedna odpověď, skill nepoužívej — je drahý a pomalý. Používej cíleně."
 
-model: claude-sonnet-4-5-20250929
-effort: high
-
 allowed-tools:
   - AskUserQuestion
   - Read
