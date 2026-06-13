@@ -336,19 +336,37 @@ Clearly separate:
 
 ## 7. Saving the conversation log
 
-After completing the cross-check, save the full exchange to a log file:
+After completing the cross-check, save the **full exchange** to a log file in the local `.claude/` directory. The log must capture all three parts: the **prompt** you sent, the external model's **response**, and your own **evaluation** (accepted/rejected findings, recommendations, uncertainties).
+
+Write the prompt and your evaluation to files first (so the log contains them verbatim), then assemble the log:
 
 ```bash
-# Timestamp for unique log name
+# Store the exact prompt you sent and your evaluation as files
+cat > "$WORK/prompt.txt" << 'EOF'
+[the exact prompt/question sent to the external model]
+EOF
+
+cat > "$WORK/evaluation.txt" << 'EOF'
+[your evaluation: accepted findings, rejected findings, recommendations, uncertainties]
+EOF
+
+# Log into the local .claude/ directory
+mkdir -p .claude
 TIMESTAMP=$(date '+%Y-%m-%d_%H.%M.%S')
-LOG=".second-opinion-talk_${TIMESTAMP}.log"
+LOG=".claude/_second-opinion-talk_${TIMESTAMP}.log"
 
 {
   echo "=== Second Opinion Log: $TIMESTAMP ==="
   echo "Provider: [provider/model]"
   echo ""
+  echo "--- Prompt ---"
+  cat "$WORK/prompt.txt"
+  echo ""
   echo "--- Response ---"
   cat "$WORK/answer.txt"
+  echo ""
+  echo "--- Evaluation ---"
+  cat "$WORK/evaluation.txt"
 } > "$LOG"
 
 echo "Log saved to: $LOG"
@@ -443,14 +461,24 @@ echo "=== Antigravity / agy (Google) ===" && cat "$WORK/agy_opinion.txt"
 echo ""
 echo "=== Claude Code (Anthropic) ===" && cat "$WORK/claude_opinion.txt"
 
-# 5. Save log
+# 5. Save log (prompt + all responses + your evaluation) into .claude/
+cat > "$WORK/prompt.txt" << 'EOF'
+Should we use Redis or PostgreSQL for session storage in e-commerce app?
+EOF
+cat > "$WORK/evaluation.txt" << 'EOF'
+[your evaluation: accepted findings, rejected findings, recommendations, uncertainties]
+EOF
+
+mkdir -p .claude
 TIMESTAMP=$(date '+%Y-%m-%d_%H.%M.%S')
 {
   echo "=== Second Opinion Log: $TIMESTAMP ==="
+  echo "--- Prompt ---"; cat "$WORK/prompt.txt"
   echo "--- Codex ---"; cat "$WORK/codex_opinion.txt"
   echo "--- agy ---"; cat "$WORK/agy_opinion.txt"
   echo "--- Claude ---"; cat "$WORK/claude_opinion.txt"
-} > ".second-opinion-talk_${TIMESTAMP}.log"
+  echo "--- Evaluation ---"; cat "$WORK/evaluation.txt"
+} > ".claude/_second-opinion-talk_${TIMESTAMP}.log"
 ```
 
 Analyze agreement/disagreement across all three providers and synthesize a final recommendation.
