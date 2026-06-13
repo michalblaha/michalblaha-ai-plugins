@@ -3,7 +3,7 @@
 Tato složka je Claude Code / Codex plugin a zároveň Obsidian vault. Postaveno na vzoru LLM Wiki od Andreje Karpathyho.
 
 **Název pluginu:** `wiki-tools`
-**Skills:** `wiki-ingest`, `wiki-query`, `wiki-lint`, `wiki-autoresearch`, `html-clean`, `obsidian-markdown`
+**Skills:** `wiki-ingest`, `wiki-query`, `wiki-lint`, `wiki-autoresearch`, `html-clean`, `obsidian-markdown`, `humanizer`
 **Příkazy:** `/wiki-autoresearch`
 **Cesta k vaultu:** Tento adresář (otevřete přímo v Obsidianu)
 
@@ -192,6 +192,7 @@ Wiki NEČTĚTE pro obecné programátorské dotazy nebo pro věci, které jsou j
 | `wiki-autoresearch` | `/wiki-autoresearch [topic]` — autonomní výzkumná smyčka |
 | `html-clean` | `clean this url`, `defuddle` — čištění webových stránek |
 | `obsidian-markdown` | reference na syntax Obsidian Flavored Markdown |
+| `humanizer` | `/humanizer` — detekce a humanizace AI textu (auto-detekce jazyka: CZ / EN) |
 
 ## Klíčová pravidla
 
