@@ -73,11 +73,11 @@ $usage_part = ''
 if ($null -ne $ctx_used -and "$ctx_used" -ne '') {
     $bar     = Make-Bar ([double]$ctx_used)
     $ctx_int = [int][math]::Round([double]$ctx_used)
-    # Color: green < 60 %, yellow < 85 %, red >= 85 %
-    if     ($ctx_int -ge 85) { $color = "$ESC[31m" }    # bright red
-    elseif ($ctx_int -ge 80) { $color = "$ESC[33m" }    # bright yellow
-    elseif ($ctx_int -ge 60) { $color = "$ESC[2;33m" }  # dim yellow
-    else                     { $color = "$ESC[2;32m" }  # dim green
+    # Color: green < 60 %, yellow < 80 %, bright yellow < 85 %, bright red >= 85 %
+    if     ($ctx_int -ge 85) { $color = "$ESC[91m" }   # bright red
+    elseif ($ctx_int -ge 80) { $color = "$ESC[93m" }   # bright yellow
+    elseif ($ctx_int -ge 60) { $color = "$ESC[33m" }   # yellow
+    else                     { $color = "$ESC[92m" }   # bright green
     $usage_part = "${color}Context: [$bar] ${ctx_int}%$reset"
 }
 
@@ -85,7 +85,7 @@ if ($null -ne $ctx_used -and "$ctx_used" -ne '') {
 if ($null -ne $five_pct -and "$five_pct" -ne '') {
     $five_int    = [int][math]::Round([double]$five_pct)
     $bar5        = Make-Bar ([double]$five_pct)
-    $limit_color = if ($five_int -ge 80) { "$ESC[35m" } else { "$ESC[2;35m" }  # magenta
+    $limit_color = if ($five_int -ge 80) { "$ESC[95m" } else { "$ESC[35m" }  # magenta
     $rem = Get-RemainingSeconds $five_reset
     if ($null -ne $rem) {
         $hh = [int]($rem / 3600)
@@ -102,7 +102,7 @@ if ($null -ne $five_pct -and "$five_pct" -ne '') {
 if ($null -ne $week_pct -and "$week_pct" -ne '') {
     $week_int   = [int][math]::Round([double]$week_pct)
     $barw       = Make-Bar ([double]$week_pct)
-    $week_color = if ($week_int -ge 80) { "$ESC[36m" } else { "$ESC[2;36m" }  # cyan
+    $week_color = if ($week_int -ge 80) { "$ESC[96m" } else { "$ESC[36m" }  # cyan
     $rem = Get-RemainingSeconds $week_reset
     if ($null -ne $rem) {
         $w_days = [int]($rem / 86400)
@@ -160,9 +160,9 @@ if ((Test-Path -LiteralPath $project_dir_real) -and (Get-Command git -ErrorActio
         $staged   = @(& git -C $project_dir_real diff --cached --name-only 2>$null).Count
         $total    = $unstaged + $staged
         if ($total -gt 0) {
-            $git_part = "$ESC[33mGit: ~$total changes$reset"
+            $git_part = "$ESC[93mGit: ~$total changes$reset"
         } else {
-            $git_part = "$ESC[2;32mGit: Clean$reset"
+            $git_part = "$ESC[92mGit: Clean$reset"
         }
     }
 }
@@ -170,12 +170,12 @@ if ((Test-Path -LiteralPath $project_dir_real) -and (Get-Command git -ErrorActio
 # ---------------------------------------------------------------------------
 # RESULTING LINE
 # ---------------------------------------------------------------------------
-$sep = "$ESC[90m$SEP_CHAR$reset"
+$sep = "$ESC[37m$SEP_CHAR$reset"
 
 $parts = @()
-if ($model_short) { $parts += "$ESC[34m$model_short$reset" }
+if ($model_short) { $parts += "$ESC[94m$model_short$reset" }
 if ($usage_part)  { $parts += $usage_part }
-if ($short_cwd)   { $parts += "$ESC[2;33m$short_cwd$reset" }
+if ($short_cwd)   { $parts += "$ESC[97m$short_cwd$reset" }
 if ($git_part)    { $parts += $git_part }
 
 $line = $parts -join " $sep "

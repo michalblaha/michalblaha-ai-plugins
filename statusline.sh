@@ -77,11 +77,11 @@ usage_part=''
 if [ -n "$ctx_used" ]; then
     bar="$(make_bar "$ctx_used")"
     ctx_int="$(round_int "$ctx_used")"
-    # Color: green < 60 %, dim yellow < 80 %, yellow < 85 %, red >= 85 %
-    if   [ "$ctx_int" -ge 85 ]; then color="${ESC}[31m"    # bright red
-    elif [ "$ctx_int" -ge 80 ]; then color="${ESC}[33m"    # bright yellow
-    elif [ "$ctx_int" -ge 60 ]; then color="${ESC}[2;33m"  # dim yellow
-    else                             color="${ESC}[2;32m"  # dim green
+    # Color: green < 60 %, yellow < 80 %, bright yellow < 85 %, bright red >= 85 %
+    if   [ "$ctx_int" -ge 85 ]; then color="${ESC}[91m"   # bright red
+    elif [ "$ctx_int" -ge 80 ]; then color="${ESC}[93m"   # bright yellow
+    elif [ "$ctx_int" -ge 60 ]; then color="${ESC}[33m"   # yellow
+    else                             color="${ESC}[92m"   # bright green
     fi
     usage_part="${color}Context: [${bar}] ${ctx_int}%${reset}"
 fi
@@ -90,7 +90,7 @@ fi
 if [ -n "$five_pct" ]; then
     five_int="$(round_int "$five_pct")"
     bar5="$(make_bar "$five_pct")"
-    if [ "$five_int" -ge 80 ]; then limit_color="${ESC}[35m"; else limit_color="${ESC}[2;35m"; fi  # magenta
+    if [ "$five_int" -ge 80 ]; then limit_color="${ESC}[95m"; else limit_color="${ESC}[35m"; fi  # magenta
     rem="${five_rem%.*}"
     if [ -n "$rem" ]; then
         [ "$rem" -lt 0 ] 2>/dev/null && rem=0
@@ -106,7 +106,7 @@ fi
 if [ -n "$week_pct" ]; then
     week_int="$(round_int "$week_pct")"
     barw="$(make_bar "$week_pct")"
-    if [ "$week_int" -ge 80 ]; then week_color="${ESC}[36m"; else week_color="${ESC}[2;36m"; fi  # cyan
+    if [ "$week_int" -ge 80 ]; then week_color="${ESC}[96m"; else week_color="${ESC}[36m"; fi  # cyan
     rem="${week_rem%.*}"
     if [ -n "$rem" ]; then
         [ "$rem" -lt 0 ] 2>/dev/null && rem=0
@@ -162,9 +162,9 @@ if [ -d "$project_dir_real" ] && command -v git >/dev/null 2>&1; then
         staged="$(git -C "$project_dir_real" diff --cached --name-only 2>/dev/null | grep -c .)"
         total=$((unstaged + staged))
         if [ "$total" -gt 0 ]; then
-            git_part="${ESC}[33mGit: ~${total} changes${reset}"
+            git_part="${ESC}[93mGit: ~${total} changes${reset}"
         else
-            git_part="${ESC}[2;32mGit: Clean${reset}"
+            git_part="${ESC}[92mGit: Clean${reset}"
         fi
     fi
 fi
@@ -172,14 +172,14 @@ fi
 # ---------------------------------------------------------------------------
 # RESULTING LINE
 # ---------------------------------------------------------------------------
-sep="${ESC}[90m${SEP_CHAR}${reset}"
+sep="${ESC}[37m${SEP_CHAR}${reset}"
 
 line=''
 append() { if [ -n "$line" ]; then line="${line} ${sep} $1"; else line="$1"; fi; }
 
-[ -n "$model_short" ] && append "${ESC}[34m${model_short}${reset}"
+[ -n "$model_short" ] && append "${ESC}[94m${model_short}${reset}"
 [ -n "$usage_part" ]  && append "$usage_part"
-[ -n "$short_cwd" ]   && append "${ESC}[2;33m${short_cwd}${reset}"
+[ -n "$short_cwd" ]   && append "${ESC}[97m${short_cwd}${reset}"
 [ -n "$git_part" ]    && append "$git_part"
 
 printf '%s\n' "$line"
