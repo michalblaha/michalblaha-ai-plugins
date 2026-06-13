@@ -10,8 +10,11 @@ allowed-tools:
   - WebSearch
   - WebFetch
   - Bash(command -v *)
-  - Bash(codex exec:*)
+  - Bash(codex --version:*)
+  - Bash(codex -a never exec:*)
+  - Bash(claude --version:*)
   - Bash(claude -p:*)
+  - Bash(date:*)
   - Bash(agy -p:*)
   - Bash(agy --print:*)
   - Bash(agy --prompt:*)
@@ -62,7 +65,7 @@ claude --version || echo "Claude Code CLI not installed"
 **Authentication:**
 - **Codex:** `codex login` or `OPENAI_API_KEY` env var
 - **Antigravity (agy):** `agy install` (PATH + shell aliases) then follow login instructions
-- **Claude Code:** `claude login` or `ANTHROPIC_API_KEY` env var
+- **Claude Code:** `claude auth login` or `ANTHROPIC_API_KEY` env var
 
 **Workdir:** All examples below use `WORK=$(mktemp -d)` and then `$WORK/...` for intermediate outputs. This avoids collisions during parallel runs.
 
@@ -342,11 +345,9 @@ LOG=".second-opinion-talk_${TIMESTAMP}.log"
 
 {
   echo "=== Second Opinion Log: $TIMESTAMP ==="
+  echo "Provider: [provider/model]"
   echo ""
-  echo "--- Prompt sent ---"
-  cat "$WORK/prompt.txt"
-  echo ""
-  echo "--- Response from [provider/model] ---"
+  echo "--- Response ---"
   cat "$WORK/answer.txt"
 } > "$LOG"
 

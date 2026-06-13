@@ -63,7 +63,7 @@ claude --version || echo "Claude Code CLI není nainstalované"
 **Autentizace:**
 - **Codex:** `codex login` nebo env var `OPENAI_API_KEY`
 - **Antigravity (agy):** první nastavení `agy install` (PATH + shell aliases) a přihlášení dle pokynů na <https://antigravity.google/docs/cli-reference>
-- **Claude Code:** `claude login` nebo env var `ANTHROPIC_API_KEY`
+- **Claude Code:** `claude auth login` nebo env var `ANTHROPIC_API_KEY`
 
 **Workdir:** všechny příklady níže používají `WORK=$(mktemp -d)` na začátku a pak `$WORK/...` pro mezivýstupy. Vyhne se to kolizím při paralelním běhu a uklidí to po sobě (na rozdíl od pevného `/tmp/claude/`).
 
@@ -395,7 +395,7 @@ V Claude Code se vyplatí omezit `--max-turns` (default je bez limitu) a přípa
 | Komplexní rešerše / architektura | `gpt-5.5` + xhigh | `--model "Gemini 3.1 Pro (High)"` | `claude-opus-4-7` + xhigh |
 | Rychlé code review | `gpt-5.4-mini` | `--model "Gemini 3.5 Flash (High)"` | `claude-haiku-4-5-20251001` |
 | Bezpečnostní audit (hluboký) | `gpt-5.5` + xhigh | `--model "Gemini 3.1 Pro (High)"` | `claude-opus-4-7` + xhigh |
-| Strukturovaný výstup s validací | `gpt-5.5` + `--output-schema` | — (bez schema validace) | — (bez schema validace) |
+| Strukturovaný výstup s validací | `gpt-5.5` + `--output-schema` | — (bez schema validace) | `claude-opus-4-7` + `--json-schema` |
 | Faktografická verifikace | `gpt-5.5` (kombinuj se zdroji) | `--model "Gemini 3.1 Pro (High)"` | `claude-opus-4-7` |
 | Multi-model konsenzus | spusť všechny tři a porovnej | spusť všechny tři a porovnej | spusť všechny tři a porovnej |
 
