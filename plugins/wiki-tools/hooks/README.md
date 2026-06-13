@@ -6,7 +6,7 @@ Plugin hooks pro `wiki-tools` wiki vault. Všechny hooks jsou definovány v `hoo
 
 | Událost | Typ | Účel |
 |---|---|---|
-| `SessionStart` | command + prompt | Načítá `wiki/hot.md` do kontextu. Command typ spouští `[ -f wiki/hot.md ] && cat wiki/hot.md` jako kanonickou kontrolu (funguje i pro non-vault relace bez chyby). Prompt typ doplňuje sémantickou obnovou kontextu. Matcher: `startup\|resume`. |
+| `SessionStart` | command | Načítá `wiki/hot.md` do kontextu. Command typ spouští `[ -f wiki/hot.md ] && cat wiki/hot.md` jako kanonickou kontrolu (funguje i pro non-vault relace bez chyby). Matcher: `startup\|resume`. (Pozn.: prompt typ zde byl odstraněn — Claude Code nepodporuje prompt hooky pro SessionStart, protože při startu relace ještě neexistuje kontext konverzace.) |
 | `PostCompact` | prompt | Re-loaduje `wiki/hot.md` po kompakci kontextu. Hook-injected kontext NEPŘEŽÍVÁ kompakci (pouze `CLAUDE.md` ano), takže tento hook obnoví hot cache uprostřed relace. |
 | `PostToolUse` | command | Auto-commit změn ve `wiki/` nebo `raw/` po Write nebo Edit voláních. Chráněno `[ -d .git ]`, takže nikdy nechybuje v non-git adresářích, a `git diff --cached --quiet`, takže nikdy nevytvoří prázdný commit. |
 | `Stop` | prompt | Aktualizuje `wiki/hot.md` na konci každé Claude odpovědi krátkým shrnutím změn. |
