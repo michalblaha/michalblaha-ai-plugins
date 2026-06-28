@@ -36,6 +36,7 @@ Po načtení `rules-czech.md`:
    ```
    Počkej na odpověď. Teprve pak pokračuj.
 
+
 2. **Identifikuj AI vzorce** — Projdi text a najdi všechny vzorce popsané v `rules-czech.md`
 3. **Přepiš problémové části** — Nahraď AI klišé přirozenými alternativami podle zvoleného stylu
 4. **Zachovej význam** — Základní sdělení musí zůstat stejné
