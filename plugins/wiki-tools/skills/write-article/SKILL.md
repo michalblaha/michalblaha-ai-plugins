@@ -168,7 +168,7 @@ Najdi a nahraď zbytečné anglicismy a kalky vhodnými českými výrazy (např
 
 Odstraň typické znaky strojově generovaného textu: prázdné fráze, vatu, opakování, nadužívané spojky a obraty, falešně vyvážené formulace („na jednu stranu… na druhou stranu" bez obsahu), generické úvody a závěry, květnatost bez informační hodnoty. Text má znít jako práce zkušeného člověka-novináře. Ber přitom v potaz **kontext** článku (téma, cílovou skupinu, žánr) — co je v jednom kontextu vata, může být jinde nutné upřesnění.
 
-Pro tuto kontrolu použij stejnou korektorskou instrukci jako v bodě 1 a navíc můžeš zavolat skill `wiki-tools:humanizer`, který detekuje a odstraňuje české AI vzorce.
+Pro tuto kontrolu použij stejnou korektorskou instrukci jako v bodě 1 a navíc můžeš zavolat skill `/wiki-tools:humanizer`, který detekuje a odstraňuje české AI vzorce.
 
 ### 4. Kontrola a dohledání zdrojů
 
