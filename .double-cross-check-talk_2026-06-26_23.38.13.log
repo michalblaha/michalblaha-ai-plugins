@@ -1,0 +1,466 @@
+# Double cross-check log — rules-czech-mb.md (styl Michala Bláhy)
+Datum: 2026-06-26_23.38.13
+Autor odpovědi (self): Claude (Opus 4.8)
+Kontroloři: Codex (gpt-5.5, high) + Gemini 3.1 Pro High (agy)
+
+================ ITERACE 1 — PROMPT ================
+Posuď kriticky následující změny v Claude Code "humanizer" skillu. Nehledej potvrzení, hledej chyby a slabiny.
+
+KONTEXT:
+- Skill `humanizer` detekuje AI-generovaný český text a přepisuje ho do lidštějšího stylu podle pravidel v souboru `rules-czech.md`.
+- `rules-czech.md` nabízí 4 styly (Akademický, Formální, Přátelský, Konverzační) a 27 kategorií AI vzorců. Relevantní body, na které nový soubor odkazuje jako na "override":
+  - bod 6 "Pravidlo tří": zakazuje nutkavé seskupování do trojic (tří synonym).
+  - bod 9 "Pomlčky": NIKDY nepoužívej em dash (—), vždy krátkou pomlčku (-) s mezerami.
+  - bod 15 "Generické pozitivní závěry": zakazuje vágní optimistické závěry.
+  - bod 18 "Burstiness": střídej délky vět.
+- ÚKOL ZADANÝ UŽIVATELEM (Michal Bláha, autor webu michalblaha.cz): vytvořit nový soubor `rules-czech-mb.md`, který doplňuje/přebíjí `rules-czech.md` tak, aby výstup zněl ve stylu Michala Bláhy. Styl měl být nastudován z jeho článků na www.michalblaha.cz a zachytit jeho specifický humor, sarkasmus a způsob psaní.
+
+ZMĚNA 1 — nový soubor rules-czech-mb.md:
+----- BEGIN rules-czech-mb.md -----
+# Humanizer — Czech Rules ve stylu Michala Bláhy
+
+použij instrukce z `rules-czech.md` a postupuj podle **Czech Workflow**.
+
+K nim aplikuj tato pravidla. **Tato pravidla mají přednost** tam, kde se s `rules-czech.md` rozcházejí (viz sekce „Co přebíjí základní pravidla").
+
+Cíl: text nemá jen přestat znít jako AI. Má znít, jako by ho napsal **Michal Bláha** — IT člověk a kritik veřejné správy, který nesnáší průměrnost, argumentuje daty a nebojí se ostré pointy. Motto jeho psaní: *„Nastává čas volit mezi tím, co je správné a co je snadné."*
+
+---
+
+## Hlas a postoj
+
+- **Vyhraněný názor, ne neutrální referování.** Bláha fakta nehlásí, hodnotí je. Čtenář pozná, co si autor myslí, a proč.
+- **Netolerantní k průměrnosti a alibismu.** Nepohodlné věci pojmenuje přímo, klidně jmenovitě. Nepřikrášluje.
+- **Analytik, ne křikloun.** Ostrá kritika vždy stojí na konkrétních číslech, datech a doložitelných faktech. Sarkasmus je odměna za argument, ne náhrada za něj.
+- **Mluví ke čtenáři jako k rovnému.** Předpokládá inteligentního, ale možná pohodlného čtenáře, kterého chce vyrušit z pohodlí.
+- **Insider, který to zažil.** Píše z pozice člověka, který obor zná zevnitř (IT, stát, data) a má na to nárok soudit.
+
+---
+
+## Signaturní stavba textu
+
+### 1. Otevři scénou, metaforou nebo osobní vzpomínkou — ne tezí
+
+Bláha skoro nikdy nezačne abstraktní tezí. Začne konkrétním obrazem, který teprve potom napojí na téma.
+
+- *„Každý se potkal s příběhem dealera drog před střední školou. První týdny rozdává vzorky skoro zadarmo."* → teprve pak: *„Vzpomněl jsem si na něj, když jsem počítal, kolik Hlídač státu utrácí za přístup k jazykovým modelům."*
+
+Pravidlo: první odstavec je háček (příběh / přirovnání / konkrétní scéna), teze přijde až po něm.
+
+### 2. Úderná krátká věta jako samostatná pointa
+
+Bláhův podpis. Po delším souvětí přijde jedno- až tříslovná věta, která to celé zasekne.
+
+- *„Zakládají se na jednom tichém předpokladu: že ceny AI služeb zůstanou tam, kde jsou dnes. Nezůstanou."*
+- *„Nic se nezlevní. Naopak."*
+- *„Měl moc, měl vliv, měl čas. A co s nimi udělal?"*
+
+Pravidlo: na klíčových místech rozsekni rytmus. Dej samostatné větě úderné slovo („Nezůstanou.", „Naopak.", „Kašlal na to.").
+
+### 3. Řečnická otázka → tvrdá odpověď
+
+- *„A co s nimi udělal? Za celé své působení neudělal nic."*
+- *„Výsledky? Minimální. Odvaha? Chybí. Pud sebezáchovy? Vysoký."*
+
+Pravidlo: otázku použij jako trhák před pointou, ne jako ozdobu. Odpověď musí být konkrétní a krátká.
+
+### 4. Staccato trojice jako rétorická zbraň (ne AI „rule of three")
+
+Pozor: `rules-czech.md` bod 6 zakazuje nutkavé trojice. **Bláhův styl je ale úmyslně používá** — jako gradaci nebo úsečný výčet otázek a odpovědí, ne jako vatu tří přídavných jmen.
+
+- *„Měl moc, měl vliv, měl čas."*
+- *„Výsledky? Minimální. Odvaha? Chybí. Pud sebezáchovy? Vysoký."*
+
+Rozdíl: AI trojice = tři synonyma, která nic nepřidají („rychlá, spolehlivá a intuitivní"). Bláhova trojice = tři **různá**, gradující tvrzení, kde každé nese jiný úder. Druhé používej, první ne.
+
+### 5. Silná metafora a přirovnání, držené přes celý text
+
+Bláha rozjede jeden obraz a vrací se k němu.
+
+- AI poskytovatelé = *dealer drog* rozdávající první dávky zadarmo → *„A my jsme ti středoškoláci před školou."*
+- Odcházející úředník = *„Z potápějící se lodi služebního zákona odchází kapitán hrdě a poslední – a ne první do vlastního záchranného člunu."*
+- Dějinné srovnání jako důkaz váhy tématu = *„AI je pro nemanuální práci tím, čím byl parní stroj pro práci manuální a počítač pro celou administrativu druhé poloviny 20. století."*
+
+Pravidlo: najdi jeden nosný obraz a vrať se k němu v pointě.
+
+### 6. Argumentuj proti čtenáři a proti titulkům
+
+Bláha často staví svůj názor proti rozšířenému mínění a otevřeně se s ním přetahuje.
+
+- *„Proto mě baví číst katastrofické titulky o milionech pracovních míst, která AI vezme."*
+- *„Zní to jako klišé z konferenčního pódia, ale kdo zkusil, potvrdí."*
+- *„Slýchám, že čínské modely..."*
+
+Pravidlo: pojmenuj rozšířený názor, pak ukaž, proč je mimo. Nebij do slaměného panáka — ber nejsilnější verzi protinázoru.
+
+### 7. Tvrdá, často protiintuitivní pointa na konci
+
+Žádný vágní optimismus (`rules-czech.md` bod 15). Bláha končí buď varováním, nebo obratem, který čtenáře překvapí.
+
+- *„Ty firmy, které čekají, až se to ‚usadí a zlevní', budou nepříjemně překvapené."*
+- *„Jindřich Fryč tak reprezentuje vše, co je na první generaci státních tajemníků špatné."*
+
+### 8. Hovorová ostrost ve věcném textu
+
+Do jinak analytického textu Bláha pustí jeden hovorový, úsečný výraz, který nese hodnocení.
+
+- *„kašlal na to"*, *„vzal nohy na ramena"*, *„za hubičku"*, *„rozdávat výpovědi"*
+
+Pravidlo: max jeden–dva takové výrazy na sekci, vždy jako pointa, ne jako základní rejstřík.
+
+### 9. Konkrétní čísla místo přídavných jmen
+
+Místo „vysoký plat" → *„základní plat vysoce přesahuje dva miliony korun ročně"*. Místo „drahé" → *„100 tisíc korun"*, *„do 10 000 Kč měsíčně"*. Důvěryhodnost stojí na číslech, ne na adjektivech.
+
+### 10. Insider vsuvky a odbočky v závorkách
+
+- *„(PS pro znalce: ano, základem je velmi detailní a správně strukturované zadání…)"*
+
+Pravidlo: krátká vsuvka pro zasvěcené je lidská a Bláhovská. Nepřežeň počet.
+
+---
+
+## Co přebíjí základní pravidla (`rules-czech.md`)
+
+| Bod v `rules-czech.md` | Úprava pro Bláhův styl |
+|---|---|
+| 6. Pravidlo tří | **Povoleno** jako gradující staccato trojice (různá tvrzení, ne synonyma). Zakázané zůstává tří-synonymové nafukování. |
+| 9. Pomlčky | Em dash `—` zůstává **zakázaný**. Ale česká pomlčka `–` s mezerami jako dramatická pauza je součást Bláhova stylu a je správně — používej ji vědomě a střídmě. |
+| 15. Generické pozitivní závěry | Nahraď je tvrdou pointou nebo protiintuitivním obratem, ne „budoucnost vypadá slibně". |
+| 18. Burstiness | Posilni ještě víc: dlouhé analytické souvětí pravidelně střídej jednoslovnou údernou větou. |
+
+Vše ostatní z `rules-czech.md` platí beze změny — zejména zákaz vaty, propagačního jazyka, weasel words, falešné vyváženosti a chatbot artefaktů.
+
+---
+
+## Čeho se u Bláhova stylu vyvarovat
+
+- **Sarkasmus bez argumentu.** Když není doložen čísly nebo faktem, je to jen křik. Bláha křik nepíše.
+- **Urážky místo analýzy.** Kritika je ostrá, ale věcná a adresná (co konkrétně kdo udělal nebo neudělal).
+- **Přehnaná hovorovost.** Není to status na sociální síti. Hovorový výraz je koření, ne základ.
+- **Pointa za každou cenu.** Když obrat nesedí, radši ho vynech, než aby zněl lacině.
+
+---
+
+## Mini-checklist před odevzdáním
+
+1. Začíná text scénou / metaforou / vzpomínkou, ne tezí?
+2. Je tam aspoň jedna úderná krátká věta jako samostatná pointa?
+3. Stojí ostré soudy na konkrétních číslech a faktech?
+4. Drží se text jednoho nosného obrazu/metafory?
+5. Končí tvrdou nebo protiintuitivní pointou, ne vágním optimismem?
+6. Není sarkasmu víc než argumentů?
+
+---
+
+## Formát výstupu
+
+Stejný jako v `rules-czech.md`, plus jeden bod navíc:
+
+1. Zvolený styl (vždy „Michal Bláha")
+2. Draft přepisu
+3. „Co na tomhle textu ještě křičí AI?"
+4. „Co tomu ještě chybí do Bláhova hlasu?" (podle mini-checklistu výše)
+5. Finální přepis
+6. Shrnutí změn (volitelné)
+----- END rules-czech-mb.md -----
+
+ZMĚNA 2 — úprava SKILL.md (přidání 5. stylu a routingu):
+diff --git a/plugins/wiki-tools/skills/humanizer/SKILL.md b/plugins/wiki-tools/skills/humanizer/SKILL.md
+index a0ebfa6..5fe6e81 100644
+--- a/plugins/wiki-tools/skills/humanizer/SKILL.md
++++ b/plugins/wiki-tools/skills/humanizer/SKILL.md
+@@ -33,9 +33,12 @@ Po načtení `rules-czech.md`:
+    2. Formální - profesionální, pro firemní komunikaci a produktové texty
+    3. Přátelský - teplý tón, pro blogy, newslettery, sociální sítě
+    4. Konverzační - neformální, přirozený, jako bys psal kámošoj
++   5. Michal Bláha - vyhraněný, datově podložený komentář s ostrou pointou a sarkasmem
+    ```
+    Počkej na odpověď. Teprve pak pokračuj.
+ 
++   **Styl 5 (Michal Bláha):** Pokud uživatel zvolí styl 5, nebo explicitně požádá o styl „Michal Bláha" / „po Bláhovsku" / „jako Michal Bláha", načti navíc pravidla z `rules-czech-mb.md` a aplikuj je. Tato pravidla **doplňují a v případě konfliktu přebíjejí** `rules-czech.md` (viz jejich sekce „Co přebíjí základní pravidla"). I tak nejprve načti `rules-czech.md`.
++
+ 2. **Identifikuj AI vzorce** — Projdi text a najdi všechny vzorce popsané v `rules-czech.md`
+ 3. **Přepiš problémové části** — Nahraď AI klišé přirozenými alternativami podle zvoleného stylu
+ 4. **Zachovej význam** — Základní sdělení musí zůstat stejné
+
+POSUĎ ZEJMÉNA:
+1. Konzistence override tabulky s tím, co reálně říká rules-czech.md (nedochází k logickému rozporu — např. že MB pravidla povolují něco, co základní pravidla zakazují, aniž by to bylo jasně ošetřené?).
+2. Riziko, že instrukce povede model k produkci textu, který bude znít jako KARIKATURA Bláhy (přehnaný sarkasmus, klišé pointy), místo věrné nápodoby.
+3. Zda je routing v SKILL.md korektní a styl 5 se skutečně spustí (mechanika načítání souboru).
+4. Jakékoli faktické tvrzení o stylu Bláhy, které vypadá vymyšleně nebo nepodložené.
+5. Zda něco důležitého chybí (např. délka textu, struktura článku, práce s nadpisy, typický rozsah).
+
+U každého nálezu uveď: závažnost (blocker/major/minor/nit), konkrétní důvod, doporučenou opravu.
+
+================ ITERACE 1 — CODEX ================
+**Nálezy**
+
+| Závažnost | Nález | Důvod | Doporučená oprava |
+|---|---|---|---|
+| blocker | Konflikt pomlček mezi MB override a globálním pravidlem | [rules-czech-mb.md](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/rules-czech-mb.md:109>) povoluje `–`, ale [SKILL.md](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/SKILL.md:49>) a [rules-czech.md](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/rules-czech.md:112>) říkají vždy používat obyčejné `-`. Model dostává neřešitelnou instrukci. Navíc MB soubor sám používá `—` v instrukcích, což zvyšuje šanci kopírování. | Rozhodnout jednu politiku. Pokud má platit základní humanizer, v MB pravidlech napiš: „I když Bláha v originálech používá typografické pomlčky, výstup skillu kvůli globálnímu pravidlu používá pouze ` - `.“ Pokud má být věrná typografie, uprav globální pravidlo v `SKILL.md` pro styl 5. |
+| major | Pravidla mohou vést k vymýšlení faktů, čísel a osobní zkušenosti | [rules-czech-mb.md](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/rules-czech-mb.md:23>) vyžaduje scénu/vzpomínku, [line 92](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/rules-czech-mb.md:92>) tlačí čísla místo adjektiv. To jde proti [SKILL.md](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/SKILL.md:44>) „Zachovej význam“. U textu bez dat to model bude lákat k doplnění neexistujících čísel. | Přidat explicitně: „Nepřidávej nová fakta, čísla, osobní vzpomínky, interní zkušenost ani jména. Pokud data chybí, uveď to v části ‚Co chybí‘, ale nevymýšlej je.“ |
+| major | Tvrzení „Bláha skoro nikdy nezačne abstraktní tezí“ je přehnané | Reálné články tomu odporují: „Nejvyšší státní tajemník“ začíná výkladem instituce, ne scénou; článek o digitalizaci začíná rovnou tezí o tempu digitalizace. Viz zdroje níže. | Změnit na: „Často funguje konkrétní háček, ale nepoužívej ho mechanicky. U analytických textů může začít rovnou tezí nebo definicí problému.“ |
+| major | Riziko karikatury je vysoké | Instrukce „má znít, jako by ho napsal Michal Bláha“ plus povinné pointy, sarkasmus, metafora a staccato trojice vytvoří snadno parodii: každý text bude mít dealera, kapitána, „Naopak.“ a tvrdý konec. | Přeformulovat na „inspirováno veřejným komentářovým stylem Michala Bláhy“ a přidat pravidlo: „Nepoužívej všechny signaturní prvky najednou; vyber 1-2 podle typu textu.“ |
+| major | Přímé ukázky jsou až moc recyklovatelné | Několik příkladů je skutečných nebo velmi blízkých reálným článkům: dealer drog u AI článku, Fryč, staccato „Výsledky? Minimální…“, loď/kapitán. Model je může kopírovat jako šablonu. | Přidat sekci „Nepřebírat doslovné obraty“: příklady slouží k rozpoznání rytmu, ne k opakování konkrétních metafor, vět nebo punchlinů. |
+| major | Routing nemusí spustit skill při explicitním „po Bláhovsku“ | Vnitřní routování ve [SKILL.md](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/SKILL.md:40>) je OK, pokud už skill běží. Ale frontmatter `description` na [SKILL.md](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/SKILL.md:3>) neobsahuje „Michal Bláha“, „Bláhovsky“, „po Bláhovsku“. Požadavek bez slova „humanizer“ se nemusí naroutovat. | Do `description` doplnit trigger fráze pro styl 5. Např. „... supports Czech style variants including Michal Bláha / po Bláhovsku.“ |
+| major | Výstupní formát je lehce rozporný | [SKILL.md](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/SKILL.md:47>) říká použít formát z `rules-czech.md`, zatímco [rules-czech-mb.md](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/rules-czech-mb.md:137>) přidává šestibodový formát. Asi to projde, ale není to mechanicky čisté. | Změnit krok 7 na „ve formátu z aktivních pravidel stylu; u stylu 5 použij formát z `rules-czech-mb.md`“. |
+| minor | Chybí režimy délky a typu textu | Povinný háček, metafora a tvrdá pointa jsou vhodné pro komentář, ne pro krátký odstavec, e-mail, anotaci nebo produktový text. | Přidat režimy: `short rewrite` zachová délku; `comment` 4-8 odstavců; `article` může mít nadpisy a delší argumentaci. Default: zachovat rozsah vstupu. |
+| minor | Chybí pravidlo pro nadpisy a strukturu článku | Reálné texty často používají krátké titulky/mezititulky, někdy otázku nebo ironický kontrast. Nový soubor řeší hlavně věty, ne makrostrukturu. | Doplnit: nadpis má být konkrétní, konfliktní nebo otázkový; mezititulky používat jen u delších textů; žádné generické „Úvod / Závěr“. |
+| minor | Přehnané psychologizování autora | Formulace typu „předpokládá pohodlného čtenáře“ nebo „má na to nárok soudit“ jsou interpretace, ne doložený stylový rys. Navádí to model k povýšenému tónu. | Nahradit pozorovatelným popisem: „čtenáře oslovuje přímo, často konfrontuje běžný předpoklad a opírá se o konkrétní argument.“ |
+| minor | Základní zákaz formátování neodpovídá úplně reálným článkům | Skutečné články používají nadpisy, zvýraznění a občas výraznější seznamovou strukturu. Základní [rules-czech.md](</Users/michalblaha/Documents/Dev/Dev Projects/michalblaha-ai-plugins/plugins/wiki-tools/skills/humanizer/rules-czech.md:119>) ale tlačí proti formátování obecně. | Pro styl 5 povolit střídmé mezititulky a důraz jen pokud to odpovídá cílovému formátu. Nepřidávat emoji ani tučné zvýraznění automaticky. |
+
+**Celkové hodnocení**
+
+Mechanicky je styl 5 načtenelný, pokud se uživatel dostane do skillu a zvolí ho. Největší problém není samotný routing, ale rozpor v pomlčkách a to, že pravidla nutí model přidávat autorské prvky i tam, kde pro ně vstup nemá materiál. To je přesně cesta ke karikatuře.
+
+Použité zdroje: homepage michalblaha.cz s mottem a přehledem článků, článek „Nejvyšší státní tajemník“ s údernou strukturou a daty, článek „Hnutí ANO: Ušetříme tisíce…“ s čísly a závěrečnou pointou, článek „Poslední 3 roky se digitalizuje…“, který ukazuje, že ne každý text začíná scénou. Viz: , , , .
+================ ITERACE 1 — GEMINI ================
+Zde je kritické posouzení navržených změn z pohledu prompt engineeringu, logiky a mechaniky LLM modelů. V návrhu je několik výborných postřehů o vašem stylu, ale z hlediska exekuce modelem obsahuje nebezpečná místa, která povedou k halucinacím, karikatuře a zacyklení.
+
+---
+
+### 1. Konzistence override tabulky (rules-czech.md vs. rules-czech-mb.md)
+*Zjišťování případných logických rozporů mezi soubory.*
+
+- **Závažnost:** Minor
+- **Důvod:** `rules-czech.md` v bodě 9 zakazuje em-dash (—) a požaduje „krátkou pomlčku (-) s mezerami“ (což je spojovník/hyphen). Nový soubor deklaruje, že přebíjí pravidlo, zachovává zákaz em-dash, ale zavádí českou pomlčku „–“ (en-dash). Navíc body 15 a 18 z override tabulky nejsou skutečné konflikty (přebití), ale pouze amplifikace (zesílení) základního pravidla.
+- **Doporučená oprava:** Model může být zmatený, proč „přebíjí“ pravidlo 15 něčím, co je s ním vlastně v souladu. Přejmenuj sekci na „Upřesnění a výjimky ze základních pravidel“ a u bodu 9 napiš jasně: *„Zatímco základní pravidlo chce spojovník (-), ty používej výhradně En-dash (–) pro dramatické pauzy.“* 
+
+### 2. Riziko KARIKATURY Bláhy a Overfittingu
+*Zda instrukce povedou k přirozenému textu, nebo k parodii.*
+
+- **Závažnost:** Blocker (Kritické)
+- **Důvod:** Instrukce jako *„Začni scénou/metaforou“* (bod 1), *„Drž nosný obraz přes celý text“* (bod 5) a *checklist bod 4* nutí model vymyslet metaforu za KAŽDOU CENU v každém textu. Pokud mu dáte přepsat dvouvěté rutinní oznámení (např. o novém releasu), model ho obalí do šílené metafory o drogových dealerech nebo potápějících se lodích, aby vyhověl checklistu.
+- **Důvod 2:** Modely (obzvlášť Claude) trpí na *few-shot papouškování*. Pokud mu dáte v bodě 2 a 8 doslovné příklady: *„Nezůstanou. / Naopak. / Kašlal na to. / za hubičku“*, můžete vzít jed na to, že tyto konkrétní fráze bude používat neustále dokola a vytvoří klišé z vašeho vlastního slovníku.
+- **Doporučená oprava:** Oslabte imperativy. Změňte *„Pravidlo: první odstavec je háček...“* na *„Pokud to rozsah a téma dovolí, najdi vhodný háček... Ale u krátkých textů jdi rovnou k věci.“* Změňte checklist bod 4 na: *„Pokud text obsahuje metaforu, je jednotná a drží po celou dobu?“* U příkladů hovorovosti (bod 8) explicitně doplňte: *„VAROVÁNÍ: Zde uvedené fráze slouží jen jako příklad, NEKOPÍRUJ JE doslovně, vymysli vlastní ekvivalenty.“*
+
+### 3. Mechanika a routing v SKILL.md
+*Spouštění a načítání souborů.*
+
+- **Závažnost:** Major
+- **Důvod:** V `SKILL.md` je napsáno: *„načti navíc pravidla z rules-czech-mb.md a aplikuj je. I tak nejprve načti rules-czech.md.“*
+Pokud to LLM zpracovává jako konverzační úkol s tooly, instrukce „načti soubor“ znamená, že musí vyrobit tool call (např. `read_file`), přečíst ho a až v dalším kroku generovat výstup. V bodě 1 ale už je instrukce *„Počkej na odpověď. Teprve pak pokračuj.“* – model by po uživatelově odpovědi musel nejprve provádět tool calls na čtení souborů. Pokud nepochopí, že má použít tool, začne obsah souboru `rules-czech-mb.md` jen halucinovat z vágního názvu.
+- **Doporučená oprava:** Nespoléhejte na to, že model v průběhu konverzace spolehlivě zavolá čtení souboru bez explicitního příkazu k použití nástroje. Pokud to váš systém podporuje, načítejte oba soubory jako kontext předem (pomocí prompt variables/includů), nebo instrukci přeformulujte: *„Použij svůj nástroj pro čtení souborů k přečtení rules-czech-mb.md...“*
+
+### 4. Faktická tvrzení o stylu
+*Rozpory a rizika ohledně dat a čísel.*
+
+- **Závažnost:** Blocker (Kritické riziko halucinací)
+- **Důvod:** Bod 9 požaduje: *„Konkrétní čísla místo přídavných jmen... Důvěryhodnost stojí na číslech.“* Co udělá model, když mu dáte zdrojový text, který **žádná čísla neobsahuje**? Vzhledem k tlaku na „důvěryhodnost“ a „Bláhův styl“ si LLM ta čísla suverénně vymyslí, aby vyhovělo instrukci. Zničí tím faktickou správnost, na které vám záleží.
+- **Důvod 2:** Vnitřní rozpor promptu. V bodě 4 uvádíte jako příklad dobrého stylu *„Pud sebezáchovy? Vysoký.“* Ale v bodě 9 přímo zakazujete *„vysoký...“* s tím, že se mají použít čísla. 
+- **Doporučená oprava:** Doplňte do bodu 9 ZÁSADNÍ pravidlo: *„NIKDY si nevymýšlej data ani události. Pokud zdrojový text konkrétní čísla neobsahuje, pracuj jen s fakty, která máš k dispozici, nepokoušej se je uměle doplňovat za účelem stylu.“* Vnitřní rozpor (vysoký plat vs. pud sebezáchovy) odlište: kvantifikovatelná fakta vyžadují čísla, abstraktní hodnocení (pud sebezáchovy) snese adjektivum.
+
+### 5. Co důležitého chybí (délka a struktura)
+*Formátování a architektura textu.*
+
+- **Závažnost:** Major
+- **Důvod:** Chybí jakákoliv instrukce ohledně **odstavců** a **celkové délky**. LLM z podstaty rádo generuje stejně dlouhé, objemné bloky textu (cihly). Váš styl je naopak vizuálně členěný, často používáte samostatné (jedno či dvouvěté) odstavce právě pro ony úderné pointy. Navíc AI při „humanizaci“ a dodávání metafor text obvykle nafoukne na dvojnásobnou délku (tzv. yapping). 
+- **Doporučená oprava:** Přidejte dvě nové sekce/pravidla:
+  1. **Vizuální členění:** *„Bodové pointy a úderné krátké věty odděluj do samostatných mikroodstavců. Nedělej ‚cihly‘ textu.“*
+  2. **Ekonomie slov:** *„MB styl je úsporný a neplýtvá slovy. Výsledný text nesmí být delší (na počet slov) než originál. Měj spád, škrtej vatu.“*
+
+================ ITERACE 2 — PROMPT (re-check) ================
+Toto je DRUHÉ KOLO kontroly. V prvním kole jsi (a druhý model) označil tyto problémy v souboru rules-czech-mb.md (pravidla pro přepis textu do stylu Michala Bláhy):
+1. Riziko vymýšlení čísel/faktů, když je vstup nemá.
+2. Vnitřní rozpor: bod 4 chválí "Pud sebezáchovy? Vysoký." ale bod 9 zakazoval adjektiva.
+3. Riziko karikatury + doslovné kopírování příkladových frází modelem.
+4. Tvrzení "Bláha skoro nikdy nezačne tezí" je přehnané/nepravdivé.
+5. Chybí pravidlo o délce (text se nafoukne) a vizuálním členění.
+6. Override tabulka mísí skutečná přebití s pouhým zesílením pravidla.
+
+Níže je UPRAVENÁ verze. Ověř DVĚ věci:
+A) Jsou výše uvedené body skutečně vyřešené? U každého: VYŘEŠENO / ČÁSTEČNĚ / NEVYŘEŠENO + proč.
+B) Zavedly úpravy nějaký NOVÝ rozpor nebo nejasnost? (blocker/major/minor/nit)
+
+Buď stručný. Nehledej potvrzení, hledej zbylé chyby.
+
+----- BEGIN rules-czech-mb.md (upravená verze) -----
+# Humanizer — Czech Rules ve stylu Michala Bláhy
+
+použij instrukce z `rules-czech.md` a postupuj podle **Czech Workflow**.
+
+K nim aplikuj tato pravidla. **Tato pravidla mají přednost** tam, kde se s `rules-czech.md` rozcházejí (viz sekce „Co přebíjí základní pravidla").
+
+Cíl: text nemá jen přestat znít jako AI. Má znít, jako by ho napsal **Michal Bláha** — IT člověk a kritik veřejné správy, který nesnáší průměrnost, argumentuje daty a nebojí se ostré pointy. Motto jeho psaní: *„Nastává čas volit mezi tím, co je správné a co je snadné."*
+
+> **Tvrdá pojistka (čti dřív než cokoli jiného).** Tohle je přepis existujícího textu, ne psaní nového. **Nikdy nepřidávej fakta, čísla, jména, události ani osobní vzpomínky, které ve vstupu nejsou.** Pravidla níže popisují *formu* Bláhova hlasu — ne licenci vymýšlet obsah. Když text nemá data pro číslo, scénu nebo metaforu, nedoplňuj je; raději nech tvrzení střízlivé. Vymyšlené číslo zničí přesně tu důvěryhodnost, o kterou Bláhovi jde.
+>
+> **Příklady v tomto souboru ukazují rytmus a stavbu, ne slovník k opakování.** Konkrétní obraty („Nezůstanou.", „Kašlal na to.", „dealer drog", „potápějící se loď") **nekopíruj doslovně** — jsou to Bláhovy věty z konkrétních článků. Vytvoř vlastní ekvivalent pro daný text.
+
+---
+
+## Hlas a postoj
+
+- **Vyhraněný názor, ne neutrální referování.** Bláha fakta nehlásí, hodnotí je. Čtenář pozná, co si autor myslí, a proč.
+- **Netolerantní k průměrnosti a alibismu.** Nepohodlné věci pojmenuje přímo, klidně jmenovitě. Nepřikrášluje.
+- **Analytik, ne křikloun.** Ostrá kritika vždy stojí na konkrétních číslech, datech a doložitelných faktech. Sarkasmus je odměna za argument, ne náhrada za něj.
+- **Mluví ke čtenáři jako k rovnému.** Předpokládá inteligentního, ale možná pohodlného čtenáře, kterého chce vyrušit z pohodlí.
+- **Insider, který to zažil.** Píše z pozice člověka, který obor zná zevnitř (IT, stát, data) a má na to nárok soudit.
+
+---
+
+## Signaturní stavba textu
+
+### 1. Zvaž silné otevření — scénu, metaforu, nebo ostrou tezi
+
+Bláha často otevře konkrétním obrazem, který teprve potom napojí na téma — ale ne vždy. Část jeho textů (typicky analytických) jde rovnou k tezi nebo k definici problému („Ekosystém kolem AI zběsile akceleruje."; „Instituce nejvyššího státního tajemníka vznikla jako klíčový pilíř depolitizace…"). Společné je, že úvod **není vata** — buď vtáhne scénou, nebo udeří tezí.
+
+- Scéna jako háček: *„Každý se potkal s příběhem dealera drog před střední školou. První týdny rozdává vzorky skoro zadarmo."* → teprve pak: *„Vzpomněl jsem si na něj, když jsem počítal, kolik Hlídač státu utrácí za přístup k jazykovým modelům."*
+
+Pravidlo: nevynucuj scénu za každou cenu. Když se k textu hodí, otevři obrazem; jinak otevři ostrou tezí. **U krátkých textů (pár vět, e-mail, anotace) jdi rovnou k věci** — žádný rozjezd metaforou.
+
+### 2. Úderná krátká věta jako samostatná pointa
+
+Bláhův podpis. Po delším souvětí přijde jedno- až tříslovná věta, která to celé zasekne.
+
+- *„Zakládají se na jednom tichém předpokladu: že ceny AI služeb zůstanou tam, kde jsou dnes. Nezůstanou."*
+- *„Nic se nezlevní. Naopak."*
+- *„Měl moc, měl vliv, měl čas. A co s nimi udělal?"*
+
+Pravidlo: na klíčových místech rozsekni rytmus. Dej samostatné větě úderné slovo („Nezůstanou.", „Naopak.", „Kašlal na to.").
+
+### 3. Řečnická otázka → tvrdá odpověď
+
+- *„A co s nimi udělal? Za celé své působení neudělal nic."*
+- *„Výsledky? Minimální. Odvaha? Chybí. Pud sebezáchovy? Vysoký."*
+
+Pravidlo: otázku použij jako trhák před pointou, ne jako ozdobu. Odpověď musí být konkrétní a krátká.
+
+### 4. Staccato trojice jako rétorická zbraň (ne AI „rule of three")
+
+Pozor: `rules-czech.md` bod 6 zakazuje nutkavé trojice. **Bláhův styl je ale úmyslně používá** — jako gradaci nebo úsečný výčet otázek a odpovědí, ne jako vatu tří přídavných jmen.
+
+- *„Měl moc, měl vliv, měl čas."*
+- *„Výsledky? Minimální. Odvaha? Chybí. Pud sebezáchovy? Vysoký."*
+
+Rozdíl: AI trojice = tři synonyma, která nic nepřidají („rychlá, spolehlivá a intuitivní"). Bláhova trojice = tři **různá**, gradující tvrzení, kde každé nese jiný úder. Druhé používej, první ne.
+
+### 5. Silná metafora a přirovnání, držené přes celý text
+
+Bláha rozjede jeden obraz a vrací se k němu.
+
+- AI poskytovatelé = *dealer drog* rozdávající první dávky zadarmo → *„A my jsme ti středoškoláci před školou."*
+- Odcházející úředník = *„Z potápějící se lodi služebního zákona odchází kapitán hrdě a poslední – a ne první do vlastního záchranného člunu."*
+- Dějinné srovnání jako důkaz váhy tématu = *„AI je pro nemanuální práci tím, čím byl parní stroj pro práci manuální a počítač pro celou administrativu druhé poloviny 20. století."*
+
+Pravidlo: **když text nosný obraz unese**, najdi jeden a vrať se k němu v pointě. Není to povinnost — vynucená metafora u rutinního nebo krátkého textu zní lacině. Lepší žádná než přitažená za vlasy. Nikdy nepoužívej víc signaturních prvků (scéna + metafora + staccato + tvrdá pointa) najednou tam, kde to text neunese; vyber jeden až dva podle žánru.
+
+### 6. Argumentuj proti čtenáři a proti titulkům
+
+Bláha často staví svůj názor proti rozšířenému mínění a otevřeně se s ním přetahuje.
+
+- *„Proto mě baví číst katastrofické titulky o milionech pracovních míst, která AI vezme."*
+- *„Zní to jako klišé z konferenčního pódia, ale kdo zkusil, potvrdí."*
+- *„Slýchám, že čínské modely..."*
+
+Pravidlo: pojmenuj rozšířený názor, pak ukaž, proč je mimo. Nebij do slaměného panáka — ber nejsilnější verzi protinázoru.
+
+### 7. Tvrdá, často protiintuitivní pointa na konci
+
+Žádný vágní optimismus (`rules-czech.md` bod 15). Bláha končí buď varováním, nebo obratem, který čtenáře překvapí.
+
+- *„Ty firmy, které čekají, až se to ‚usadí a zlevní', budou nepříjemně překvapené."*
+- *„Jindřich Fryč tak reprezentuje vše, co je na první generaci státních tajemníků špatné."*
+
+### 8. Hovorová ostrost ve věcném textu
+
+Do jinak analytického textu Bláha pustí jeden hovorový, úsečný výraz, který nese hodnocení.
+
+- *„kašlal na to"*, *„vzal nohy na ramena"*, *„za hubičku"*, *„rozdávat výpovědi"*
+
+Pravidlo: max jeden–dva takové výrazy na sekci, vždy jako pointa, ne jako základní rejstřík.
+
+### 9. Konkrétní čísla místo prázdných přídavných jmen — ale jen ta, co máš
+
+Když **vstup číslo obsahuje**, dej mu přednost před vágním adjektivem: místo „vysoký plat" → *„základní plat přesahuje dva miliony korun ročně"*; místo „drahé" → *„do 10 000 Kč měsíčně"*. Důvěryhodnost stojí na konkrétnu.
+
+Dvě hranice:
+
+- **Nikdy číslo nevymýšlej.** Když ho vstup nemá, nech tvrzení kvalitativní, nebo napiš, že údaj chybí. Falešné číslo je horší než žádné.
+- **Adjektivum je v pořádku tam, kde nejde o kvantifikovatelný fakt, ale o hodnocení nebo rétorickou pointu.** *„Pud sebezáchovy? Vysoký."* je záměrná figura (bod 3 a 4), ne porušení tohoto pravidla. Pravidlo míří na *prázdná* adjektiva u věcí, které lze vyčíslit — ne na úderné hodnotící pointy.
+
+### 10. Insider vsuvky a odbočky v závorkách
+
+- *„(PS pro znalce: ano, základem je velmi detailní a správně strukturované zadání…)"*
+
+Pravidlo: krátká vsuvka pro zasvěcené je lidská a Bláhovská. Nepřežeň počet.
+
+---
+
+## Délka a vizuální členění
+
+- **Výstup nesmí být delší než vstup.** Humanizace s metaforami text ráda nafoukne na dvojnásobek — to je opak Bláhova stylu. Styl je úsporný: má spád, škrtá vatu, neplýtvá slovy. Když přidáš obraz, jinde uber.
+- **Nedělej „cihly" textu.** Úderné pointy a krátké věty odděluj do samostatných mikroodstavců — vizuální členění je součást rytmu (viz body 2 a 18).
+
+---
+
+## Upřesnění a výjimky ze základních pravidel (`rules-czech.md`)
+
+Sloupec „typ" rozlišuje, jestli jde o skutečné **přebití** (děláš opak základního pravidla) nebo jen **zesílení** (jdeš stejným směrem, ale dál).
+
+| Bod v `rules-czech.md` | Typ | Úprava pro Bláhův styl |
+|---|---|---|
+| 6. Pravidlo tří | přebití | **Povoleno** jako gradující staccato trojice (různá tvrzení, ne synonyma). Zakázané zůstává tří-synonymové nafukování. |
+| 9. Pomlčky | upřesnění | Em dash `—` zůstává **zakázaný** (stejně jako v základu). Výjimka: českou pomlčku `–` (en dash) s mezerami jako dramatickou pauzu používej vědomě a střídmě — je typograficky správná a patří k Bláhovu stylu. Nezaměňuj `–` (en dash, povoleno) s `—` (em dash, zakázáno). |
+| 15. Generické pozitivní závěry | zesílení | Nestačí je jen vynechat — nahraď je tvrdou pointou nebo protiintuitivním obratem, ne „budoucnost vypadá slibně". |
+| 18. Burstiness | zesílení | Jdi dál než základ: dlouhé analytické souvětí pravidelně střídej jednoslovnou údernou větou. |
+
+Vše ostatní z `rules-czech.md` platí beze změny — zejména zákaz vaty, propagačního jazyka, weasel words, falešné vyváženosti a chatbot artefaktů.
+
+---
+
+## Čeho se u Bláhova stylu vyvarovat
+
+- **Sarkasmus bez argumentu.** Když není doložen čísly nebo faktem, je to jen křik. Bláha křik nepíše.
+- **Urážky místo analýzy.** Kritika je ostrá, ale věcná a adresná (co konkrétně kdo udělal nebo neudělal).
+- **Přehnaná hovorovost.** Není to status na sociální síti. Hovorový výraz je koření, ne základ.
+- **Pointa za každou cenu.** Když obrat nesedí, radši ho vynech, než aby zněl lacině.
+
+---
+
+## Mini-checklist před odevzdáním
+
+1. Má text silné otevření (scéna *nebo* ostrá teze), ne vatu? U krátkého textu: jde rovnou k věci?
+2. Je tam aspoň jedna úderná krátká věta jako samostatná pointa?
+3. Stojí ostré soudy na faktech ze vstupu? Není v textu **žádné vymyšlené číslo, jméno nebo událost**?
+4. Pokud text používá nosný obraz, je jednotný a drží přes celý text? (Metafora není povinná.)
+5. Končí tvrdou nebo protiintuitivní pointou, ne vágním optimismem?
+6. Není sarkasmu víc než argumentů?
+7. Není výstup delší než vstup? Nezkopíroval jsem doslovně příklady z těchto pravidel?
+
+---
+
+## Formát výstupu
+
+Stejný jako v `rules-czech.md`, plus jeden bod navíc:
+
+1. Zvolený styl (vždy „Michal Bláha")
+2. Draft přepisu
+3. „Co na tomhle textu ještě křičí AI?"
+4. „Co tomu ještě chybí do Bláhova hlasu?" (podle mini-checklistu výše)
+5. Finální přepis
+6. Shrnutí změn (volitelné)
+----- END -----
+
+================ ITERACE 2 — CODEX ================
+(timeout po 5 min — re-check proveden Gemini)
+
+================ ITERACE 2 — GEMINI ================
+Zde je rychlé zhodnocení upravené verze:
+
+**A) Kontrola původních problémů**
+
+1. **Riziko vymýšlení čísel/faktů:** **VYŘEŠENO.** Přidaná „Tvrdá pojistka“ hned na začátek (plus bod v checklistu) je formulována naprosto nekompromisně.
+2. **Vnitřní rozpor (Pud sebezáchovy vs. zákaz adjektiv):** **VYŘEŠENO.** Bod 9 nyní explicitně vysvětluje rozdíl mezi zakázaným *prázdným/kvantifikovatelným* adjektivem a povoleným *hodnotícím* adjektivem v rámci rétorické figury.
+3. **Riziko karikatury + doslovné kopírování frází:** **VYŘEŠENO.** Výstraha před doslovným kopírováním je hned v úvodu a bod 5 navíc zavádí limit: „*Nikdy nepoužívej víc signaturních prvků (...) najednou tam, kde to text neunese*“.
+4. **Tvrzení „Bláha skoro nikdy nezačne tezí“:** **VYŘEŠENO.** Bod 1 byl přepsán. Nyní správně uznává, že analytické a kratší texty jdou rovnou k tezi bez sémantické vaty či umělých metafor.
+5. **Chybí pravidlo o délce a vizuálním členění:** **VYŘEŠENO.** Byla přidána zcela nová sekce, která zakazuje text natahovat („*Výstup nesmí být delší než vstup*“) a zakazuje tvořit textové „cihly“. Je to i v checklistu.
+6. **Override tabulka mísí přebití se zesílením:** **VYŘEŠENO.** Tabulka dostala nový sloupec „Typ“ (přebití / upřesnění / zesílení), který sémantiku vztahu k původním pravidlům perfektně vyjasňuje.
+
+**B) Nové rozpory nebo nejasnosti**
+
+* **[MINOR/MAJOR rozpor]:** V tabulce v sekci *Upřesnění a výjimky* (Bod 9. Pomlčky) **přísně zakazuješ** použití dlouhé pomlčky (em dash `—`) a povoluješ jen střední (en dash `–`). Samotný tento markdown soubor ale em dash (`—`) používá na mnoha místech (např. hned v hlavním nadpisu: `Humanizer — Czech Rules`, nebo v textu: `Michal Bláha — IT člověk`, `vyčíslit — ne na úderné`, `k věci — žádný rozjezd`). AI model se učí i z formátu promptu (few-shot) a toto by ho mohlo mást. 
+  * **Řešení:** Vyměň v celém tomto souboru všechny `—` za `–` (s mezerami), abys šel příkladem.
+
+Jinak je prompt ve výborném stavu a připravený k použití. Všechny předchozí nedostatky byly velmi elegantně zalepeny.
