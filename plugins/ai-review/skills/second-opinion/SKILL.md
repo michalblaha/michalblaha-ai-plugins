@@ -25,6 +25,8 @@ allowed-tools:
   - Bash(echo:*)
   - Bash(git diff:*)
   - Bash(git log:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
 
 argument-hint: "question / file / decision to review"
 
@@ -33,6 +35,11 @@ argument-hint: "question / file / decision to review"
 # Second Opinion via Codex, Antigravity & Claude Code CLI
 
 Get an external AI perspective from OpenAI (via Codex CLI), Google (via Antigravity CLI — `agy`), or Anthropic (via Claude Code CLI) to validate decisions or compare approaches.
+
+**Shared reference files** (paths relative to this skill's directory):
+
+- `../references/cli-reference.md` — availability checks, authentication, mandatory flags, failure handling, full call patterns, CLI option tables, and model recommendations for all three providers. **Read it before making the first provider call.**
+- `../references/trusted-sources.md` — when AI cross-check isn't enough: independent sources and the trusted-media list.
 
 ---
 
@@ -52,260 +59,77 @@ Never verify with the same model family that produced the answer — it shares t
 
 Skill assumes a shell environment with the relevant CLI tools installed. **In a shell-less environment** (plain chat without bash tool), offer the user to send the verification prompt to another model manually, or use web search for fact grounding.
 
-Verify availability before use:
+Details live in `../references/cli-reference.md`. The non-negotiables:
 
-```bash
-codex --version || echo "Codex CLI not installed"
-command -v agy >/dev/null && agy models >/dev/null 2>&1 \
-  && echo "Antigravity (agy) OK" \
-  || echo "Antigravity CLI (agy) not installed or not configured"
-claude --version || echo "Claude Code CLI not installed"
-```
-
-**Authentication:**
-- **Codex:** `codex login` or `OPENAI_API_KEY` env var
-- **Antigravity (agy):** `agy install` (PATH + shell aliases) then follow login instructions
-- **Claude Code:** `claude auth login` or `ANTHROPIC_API_KEY` env var
-
-**Workdir:** All examples below use `WORK=$(mktemp -d)` and then `$WORK/...` for intermediate outputs. This avoids collisions during parallel runs.
-
-**Codex — mandatory `--skip-git-repo-check` flag:** Every `codex exec` call **must** include `--skip-git-repo-check`. Codex refuses to run outside a git repo by default; this skill never writes via Codex so the check is unnecessary and would fail when CWD is outside a repo.
-
-**Fallback when `codex exec` fails:** If a Codex call fails despite the flags (timeout, auth issue, runtime error), delegate to the `codex:codex-rescue` skill / subagent. Use only one retry; if that also fails, switch to a different provider and note the failure in the *Uncertainties* section of your final answer.
-
-**IMPORTANT: Run `codex`, `agy`, and `claude` directly on the system, NOT in a sandboxed environment — they need login credentials that are unavailable in a sandbox.**
+- Verify CLI availability before use (see reference §1 for the check snippet and authentication).
+- Run `codex`, `agy`, and `claude` **directly on the system, NOT in a sandbox** — they need login credentials unavailable there.
+- Every Codex call is `codex -a never exec --skip-git-repo-check ...`; on failure fall back to `codex:codex-rescue` (one retry), then switch provider.
+- Check exit codes on every provider call — an **empty output file means the call failed**, not that the model returned an empty answer. After one retry, switch provider and record the failure under *Uncertainties*.
+- Use `WORK=$(mktemp -d)` for intermediate outputs.
 
 ---
 
 ## 3. Quick Patterns
 
-### Using Codex (OpenAI)
+Minimal one-shot examples. Full patterns (structured/schema output, images, workspace grounding, cheaper tiers) are in `../references/cli-reference.md` §3.
 
-#### Simple Question
 ```bash
 WORK=$(mktemp -d)
+
+# Codex (OpenAI)
 codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
-  --output-last-message "$WORK/answer.txt" \
+  --output-last-message "$WORK/codex.txt" \
   "Your question here"
-cat "$WORK/answer.txt"
+cat "$WORK/codex.txt"
+
+# Antigravity / agy (Google) — always a Gemini model
+agy -p "Your question here" --model "Gemini 3.1 Pro (High)" > "$WORK/agy.txt"
+cat "$WORK/agy.txt"
+
+# Claude Code (Anthropic)
+claude -p "Your question here" --model opus --output-format text > "$WORK/claude.txt"
+cat "$WORK/claude.txt"
 ```
 
-#### Structured Analysis (Recommended)
+For schema-validated structured output use Codex `--output-schema` or Claude `--json-schema` (see reference §3); `agy` has no schema support — enforce JSON shape in the prompt.
 
-**IMPORTANT:** When using `--output-schema`, ALL objects (including nested ones) must have:
-- `"additionalProperties": false`
-- `"required": [...]` with all property names
-
-```bash
-WORK=$(mktemp -d)
-cat > "$WORK/schema.json" << 'EOF'
-{
-  "type": "object",
-  "properties": {
-    "assessment": { "type": "string" },
-    "strengths": { "type": "array", "items": { "type": "string" } },
-    "concerns": { "type": "array", "items": { "type": "string" } },
-    "recommendation": { "type": "string" }
-  },
-  "required": ["assessment", "strengths", "concerns", "recommendation"],
-  "additionalProperties": false
-}
-EOF
-
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
-  --output-schema "$WORK/schema.json" \
-  --output-last-message "$WORK/result.json" \
-  "Analyze [topic]. Provide structured assessment."
-
-cat "$WORK/result.json"
-```
-
-#### Nested Objects Example
-```bash
-WORK=$(mktemp -d)
-cat > "$WORK/nested_schema.json" << 'EOF'
-{
-  "type": "object",
-  "properties": {
-    "summary": { "type": "string" },
-    "details": {
-      "type": "object",
-      "properties": {
-        "score": { "type": "string" },
-        "items": { "type": "array", "items": { "type": "string" } }
-      },
-      "required": ["score", "items"],
-      "additionalProperties": false
-    }
-  },
-  "required": ["summary", "details"],
-  "additionalProperties": false
-}
-EOF
-```
-
-### Using Antigravity / agy (Google)
-
-Antigravity CLI (`agy`) is Google's agentic CLI with access to Gemini, Claude, and GPT-OSS models. For "second opinion from Google" always call with a `Gemini 3.1 Pro` / `Gemini 3.5 Flash` model.
-
-#### Simple Question
-```bash
-WORK=$(mktemp -d)
-agy -p "Your question here" --model "Gemini 3.1 Pro (High)" > "$WORK/answer.txt"
-cat "$WORK/answer.txt"
-```
-
-#### JSON Output
-```bash
-WORK=$(mktemp -d)
-agy -p "Analyze [topic]. Respond in JSON with: assessment (string), strengths (array), concerns (array), recommendation (string). Return ONLY the JSON object, no surrounding prose." \
-  --model "Gemini 3.1 Pro (High)" > "$WORK/result.json"
-cat "$WORK/result.json"
-```
-
-**Note:** `agy` has no `--output-format` flag — output is always raw text on stdout. Enforce JSON shape in the prompt. For strict schema-validated output, use Codex with `--output-schema`.
-
-### Using Claude Code (Anthropic)
-
-#### Simple Question
-```bash
-WORK=$(mktemp -d)
-claude -p "Your question here" --model opus --output-format text > "$WORK/answer.txt"
-cat "$WORK/answer.txt"
-```
-
-#### JSON Output
-```bash
-WORK=$(mktemp -d)
-claude -p "Analyze [topic]. Respond in JSON with: assessment (string), strengths (array), concerns (array), recommendation (string)" \
-  --model opus --output-format json > "$WORK/result.json"
-cat "$WORK/result.json"
-```
-
-#### With Cheaper Model (Simple Tasks)
-```bash
-WORK=$(mktemp -d)
-claude -p "Your question here" --model haiku --output-format text > "$WORK/answer.txt"
-cat "$WORK/answer.txt"
-```
-
-**Note:** Claude Code CLI uses `--print` (`-p`) for non-interactive mode. The spawned instance runs independently without access to the current session context, providing a genuinely fresh perspective.
+**Note:** The spawned instance runs independently without access to the current session context, providing a genuinely fresh perspective.
 
 ---
 
 ## 4. Use Cases
 
-### Architecture Review
+Reusable prompt templates — combine with any provider pattern above.
 
-**Codex:**
-```bash
-WORK=$(mktemp -d)
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
-  --output-last-message "$WORK/arch.txt" \
-  "Review this architecture decision: [description].
-   Assess: scalability, maintainability, security risks, alternatives."
-cat "$WORK/arch.txt"
+**Architecture review:**
+
+```text
+Review this architecture decision: [description].
+Assess: scalability, maintainability, security risks, alternatives.
 ```
 
-**Antigravity (agy):**
-```bash
-WORK=$(mktemp -d)
-agy -p "Review this architecture decision: [description].
-  Assess: scalability, maintainability, security risks, alternatives." \
-  --model "Gemini 3.1 Pro (High)" > "$WORK/arch.txt"
-cat "$WORK/arch.txt"
+**Security audit:**
+
+```text
+Security review of [file/code]:
+- Input validation
+- Authentication/authorization
+- Data exposure risks
+Provide specific vulnerabilities and fixes.
 ```
 
-**Claude Code:**
-```bash
-WORK=$(mktemp -d)
-claude -p "Review this architecture decision: [description].
-  Assess: scalability, maintainability, security risks, alternatives." \
-  --model opus --output-format text > "$WORK/arch.txt"
-cat "$WORK/arch.txt"
-```
+**Code review:**
 
-### Security Audit
-
-**Codex:**
-```bash
-WORK=$(mktemp -d)
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
-  --output-last-message "$WORK/security.txt" \
-  "Security review of [file/code]:
-   - Input validation
-   - Authentication/authorization
-   - Data exposure risks
-   Provide specific vulnerabilities and fixes."
-cat "$WORK/security.txt"
-```
-
-**Antigravity (agy):**
-```bash
-WORK=$(mktemp -d)
-agy -p "Security review of [file/code]:
-  - Input validation
-  - Authentication/authorization
-  - Data exposure risks
-  Provide specific vulnerabilities and fixes." \
-  --model "Gemini 3.1 Pro (High)" > "$WORK/security.txt"
-cat "$WORK/security.txt"
-```
-
-**Claude Code:**
-```bash
-WORK=$(mktemp -d)
-claude -p "Security review of [file/code]:
-  - Input validation
-  - Authentication/authorization
-  - Data exposure risks
-  Provide specific vulnerabilities and fixes." \
-  --model opus --output-format text > "$WORK/security.txt"
-cat "$WORK/security.txt"
-```
-
-### Code Review
-
-**Codex:**
-```bash
-WORK=$(mktemp -d)
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
-  --output-last-message "$WORK/review.txt" \
-  "Review [file] for: bugs, performance issues, maintainability.
-   Provide line-level recommendations."
-cat "$WORK/review.txt"
-```
-
-**Antigravity (agy):**
-```bash
-WORK=$(mktemp -d)
-agy -p "Review [file] for: bugs, performance issues, maintainability.
-  Provide line-level recommendations." \
-  --model "Gemini 3.1 Pro (High)" > "$WORK/review.txt"
-cat "$WORK/review.txt"
-```
-
-**Claude Code:**
-```bash
-WORK=$(mktemp -d)
-claude -p "Review [file] for: bugs, performance issues, maintainability.
-  Provide line-level recommendations." \
-  --model opus --output-format text > "$WORK/review.txt"
-cat "$WORK/review.txt"
+```text
+Review [file] for: bugs, performance issues, maintainability.
+Provide line-level recommendations.
 ```
 
 ---
 
 ## 5. When AI cross-check isn't enough
 
-AI models share training data — and with it, shared hallucinations. When verifying a **fact** (existence of a person/account, date, value, quote, legal/historical claim), the strongest check is not another model but an **independent source**:
-
-- For public institutions and persons: official registries, Wikidata, parliamentary/judicial databases, Hlídač státu MCP server, trusted media.
-- For recent facts: web search focused on primary sources, trusted media.
-- For code and libraries: official documentation, repo, changelog.
-- Trusted media:
-  - Czech: ceskenoviny.cz, iDnes.cz, DenikN.cz, SeznamZpravy.cz, Denik.cz, iHned.cz, cc.cz, cnn.iprima.cz, ct24.ceskatelevize.cz, irozhlas.cz, lupa.cz, novinky.cz
-  - International: reuters.com, apnews.com, bbc.com, theguardian.com, nytimes.com, washingtonpost.com, wsj.com, ft.com, economist.com, npr.org, pbs.org, propublica.org, bloomberg.com, theatlantic.com, icij.org, occrp.org
+AI models share training data — and with it, shared hallucinations. When verifying a **fact** (existence of a person/account, date, value, quote, legal/historical claim), the strongest check is not another model but an **independent source**. See `../references/trusted-sources.md` for the source strategy and the trusted-media list.
 
 Use AI cross-check for **reasoning, structure, logical gaps, code review, design decisions**. For facts, use it only as a first filter and then verify against a source.
 
@@ -336,7 +160,7 @@ Clearly separate:
 
 ## 7. Saving the conversation log
 
-After completing the cross-check, save the **full exchange** to a log file in the local `.claude/` directory. The log must capture all three parts: the **prompt** you sent, the external model's **response**, and your own **evaluation** (accepted/rejected findings, recommendations, uncertainties).
+After completing the cross-check, save the **full exchange** to a log file in the **project root** (not `.claude/`). The log must capture all three parts: the **prompt** you sent, the external model's **response**, and your own **evaluation** (accepted/rejected findings, recommendations, uncertainties).
 
 Write the prompt and your evaluation to files first (so the log contains them verbatim), then assemble the log:
 
@@ -350,10 +174,9 @@ cat > "$WORK/evaluation.txt" << 'EOF'
 [your evaluation: accepted findings, rejected findings, recommendations, uncertainties]
 EOF
 
-# Log into the local .claude/ directory
-mkdir -p .claude
+# Log into the project root
 TIMESTAMP=$(date '+%Y-%m-%d_%H.%M.%S')
-LOG=".claude/_second-opinion-talk_${TIMESTAMP}.log"
+LOG="./.second-opinion-talk_${TIMESTAMP}.log"
 
 {
   echo "=== Second Opinion Log: $TIMESTAMP ==="
@@ -370,71 +193,14 @@ LOG=".claude/_second-opinion-talk_${TIMESTAMP}.log"
 } > "$LOG"
 
 echo "Log saved to: $LOG"
+
+# The logs are meant to be versioned — commit the log if the project is a git repo
+[ -d .git ] && git add "$LOG" && git commit -m "second-opinion: log ${TIMESTAMP}"
 ```
 
 ---
 
-## 8. Key Options
-
-### Codex CLI Options
-
-| Option | Purpose |
-|--------|---------|
-| `-m gpt-5.5` | Best model (recommended) |
-| `-m gpt-5.5-codex` | Codex-optimized version for agentic coding |
-| `-m gpt-5.4-mini` | Faster, cheaper for simple tasks |
-| `-c 'model_reasoning_effort="high"'` | Reasoning level. Values: `low`, `medium`, `high`, `xhigh` |
-| `--output-schema file.json` | Structured JSON with schema validation |
-| `--output-last-message file.txt` | Save response to file |
-| `-i image.png` | Include image for analysis |
-
-### Antigravity (agy) CLI Options
-
-| Option | Purpose |
-|--------|---------|
-| `--model "Gemini 3.1 Pro (High)"` | Best Gemini reasoning (quotes required due to spaces) |
-| `--model "Gemini 3.1 Pro (Low)"` | Faster Gemini Pro |
-| `--model "Gemini 3.5 Flash (High)"` | Faster, cheaper Gemini |
-| `--model "Claude Opus 4.6 (Thinking)"` | Anthropic via agy (**do not use for cross-check** — loses provider independence) |
-| `--model "GPT-OSS 120B (Medium)"` | Open-source GPT-OSS model |
-| `-p "prompt"` / `--print` / `--prompt` | Non-interactive print mode (required for scripts) |
-| `--print-timeout 5m` | Timeout for print mode (default 5m) |
-| `--add-dir <path>` | Add directory to workspace (repeatable) |
-| `--dangerously-skip-permissions` | Auto-approve tool permission prompts (for non-interactive scripts) |
-| `agy models` | List available models |
-| `agy install` | First-time setup (PATH, shell aliases) |
-
-**Note:** `agy` has no `--output-format` flag. Output is always raw text on stdout. Enforce JSON shape in the prompt. For schema validation use Codex.
-
-### Claude Code CLI Options
-
-| Option | Purpose |
-|--------|---------|
-| `--model opus` | Alias for best available Opus |
-| `--model sonnet` | Balanced speed and quality |
-| `--model haiku` | Fastest, cheapest for simple tasks |
-| `--effort xhigh` | Deep reasoning. Values: `low`, `medium`, `high`, `xhigh`, `max` |
-| `--output-format text` | Plain text output (recommended) |
-| `--output-format json` | JSON message object output |
-| `-p "prompt"` | Non-interactive print mode (required) |
-| `--max-turns N` | Limit agentic turns (default: no limit) |
-| `--max-budget-usd N` | Cap spend per session |
-
----
-
-## 9. Provider Comparison
-
-| Use Case | Codex (OpenAI) | Antigravity / agy (Google) | Claude Code (Anthropic) |
-|----------|---------------|----------------------------|------------------------|
-| Complex architectural review | `gpt-5.5` | `"Gemini 3.1 Pro (High)"` | `opus` |
-| Fast code review | `gpt-5.4-mini` | `"Gemini 3.5 Flash (High)"` | `haiku` |
-| Security audit (deep) | `gpt-5.5` | `"Gemini 3.1 Pro (High)"` | `opus` |
-| Structured output (schema) | `gpt-5.5` + schema | N/A (no schema support) | N/A (no schema support) |
-| Multi-provider consensus | All three! | All three! | All three! |
-
----
-
-## 10. Multi-Provider Consensus Example
+## 8. Multi-Provider Consensus Example
 
 Get second opinions from all three providers and compare:
 
@@ -461,7 +227,7 @@ echo "=== Antigravity / agy (Google) ===" && cat "$WORK/agy_opinion.txt"
 echo ""
 echo "=== Claude Code (Anthropic) ===" && cat "$WORK/claude_opinion.txt"
 
-# 5. Save log (prompt + all responses + your evaluation) into .claude/
+# 5. Save log (prompt + all responses + your evaluation) into the project root
 cat > "$WORK/prompt.txt" << 'EOF'
 Should we use Redis or PostgreSQL for session storage in e-commerce app?
 EOF
@@ -469,8 +235,8 @@ cat > "$WORK/evaluation.txt" << 'EOF'
 [your evaluation: accepted findings, rejected findings, recommendations, uncertainties]
 EOF
 
-mkdir -p .claude
 TIMESTAMP=$(date '+%Y-%m-%d_%H.%M.%S')
+LOG="./.second-opinion-talk_${TIMESTAMP}.log"
 {
   echo "=== Second Opinion Log: $TIMESTAMP ==="
   echo "--- Prompt ---"; cat "$WORK/prompt.txt"
@@ -478,7 +244,8 @@ TIMESTAMP=$(date '+%Y-%m-%d_%H.%M.%S')
   echo "--- agy ---"; cat "$WORK/agy_opinion.txt"
   echo "--- Claude ---"; cat "$WORK/claude_opinion.txt"
   echo "--- Evaluation ---"; cat "$WORK/evaluation.txt"
-} > ".claude/_second-opinion-talk_${TIMESTAMP}.log"
+} > "$LOG"
+[ -d .git ] && git add "$LOG" && git commit -m "second-opinion: log ${TIMESTAMP}"
 ```
 
 Analyze agreement/disagreement across all three providers and synthesize a final recommendation.

@@ -1,7 +1,7 @@
 # ai-review
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.3.2-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue)](.claude-plugin/plugin.json)
 
 Nezávislé AI review workflows — **druhý názor** a **cross-check** napříč Claude (Anthropic), Codex (OpenAI) a Antigravity / agy (Google).
 
@@ -79,6 +79,17 @@ Skill **nepoužívej** pro běžné dotazy, kde stačí jedna odpověď — je d
 
 ---
 
+## Logy výměn
+
+Oba skilly ukládají plný záznam výměny (prompt, odpověď externího modelu, vlastní vyhodnocení) do **rootu projektu** a commitují ho do gitu:
+
+- `second-opinion` → `.second-opinion-talk_<timestamp>.log`
+- `double-cross-check` → `.double-cross-check-talk_<timestamp>.log`
+
+Logy jsou záměrně verzované — slouží jako auditní stopa cross-checků.
+
+---
+
 ## Integrace s wiki-tools
 
 Pokud je nainstalován společně s `wiki-tools`, wiki skills mohou cíleně využít `ai-review`:
@@ -93,8 +104,10 @@ Integrace je volitelná — `wiki-tools` funguje plně i bez `ai-review` a wiki 
 ## Další dokumentace
 
 - [Marketplace README](../../README.md) — kompletní dokumentace všech pluginů
-- [`skills/second-opinion/SKILL.md`](skills/second-opinion/SKILL.md) — detailní bash patterny pro Codex / Antigravity (agy) / Claude Code CLI
+- [`skills/second-opinion/SKILL.md`](skills/second-opinion/SKILL.md) — workflow pro druhý názor a multi-model konsenzus
 - [`skills/double-cross-check/SKILL.md`](skills/double-cross-check/SKILL.md) — workflow pro fact-check a investigativní rešerše
+- [`skills/references/cli-reference.md`](skills/references/cli-reference.md) — sdílené bash patterny, tabulky voleb a doporučené modely pro Codex / Antigravity (agy) / Claude Code CLI
+- [`skills/references/trusted-sources.md`](skills/references/trusted-sources.md) — nezávislé zdroje a důvěryhodná média pro fact-check
 
 ---
 

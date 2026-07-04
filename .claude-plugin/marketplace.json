@@ -15,7 +15,7 @@
     {
       "name": "ai-review",
       "source": "./plugins/ai-review",
-      "description": "Nezávislé AI review workflows pro druhý názor a cross-check napříč Claude, Codex (OpenAI) a Gemini (Google). Volitelný companion plugin pro wiki-tools.",
+      "description": "Nezávislé AI review workflows pro druhý názor a cross-check napříč Claude, Codex (OpenAI) a Antigravity / agy (Google). Volitelný companion plugin pro wiki-tools.",
       "category": "productivity"
     }
   ]
