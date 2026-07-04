@@ -6,7 +6,7 @@ description: >
   nebo aktualizuje Dataview dashboardy. Generuje canvas mapy. Triggers on: "lint",
   "health check", "clean up wiki", "check the wiki", "wiki maintenance", "find orphans",
   "wiki audit".
-allowed-tools: Read Write Edit Glob Grep
+allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 
 # wiki-lint: Health check wiki

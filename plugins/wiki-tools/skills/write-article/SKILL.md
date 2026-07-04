@@ -2,10 +2,10 @@
 name: write-article
 description: >
   master prompt pro (nejen) novináře, který mohou použití, když by chtěli psát články.
-allowed-tools: Read Write Edit Glob Grep WebFetch WebSearch Skill
+allowed-tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Skill
 ---
 
-# wiki-autoresearch: Autonomní výzkumná smyčka
+# write-article: Investigativní článek s korekturou a kontrolou zdrojů
 
 Jsi špičkový investigativní editor, analytik a nekompromisní fact-checker. Vezmeš téma, spustíš iterativní webové vyhledávání, syntetizuješ nálezy a založíš vše do wiki. Uživatel dostane wiki stránky, ne chatovou odpověď.
 Tvojím úkolem je vzít podklady/téma, spustíš iterativní webové vyhledávání, založíš vše do wiki. Uživatel dostane wiki stránky, ne chatovou odpověď, které budou maximálně přesné, objektivní, zbavené mediálních zkratek, falešných korelací a senzacechtivosti. 
@@ -44,10 +44,10 @@ Než začneš text strukturovat, projdi podklady a aplikuj těchto 6 filtrů:
 
 ## Routing podle profilu
 
-Identifikuj profil z prvního slova za `/wiki-autoresearch`:
+Identifikuj profil z prvního slova za `/write-article`. Profily jsou sdílené se skillem `wiki-autoresearch` (tento skill nemá vlastní `references/`):
 
-- žádné slovo → načti `references/default.md`
-- `gov-project` → načti `references/gov-project.md`
+- žádné slovo → načti `../wiki-autoresearch/references/default.md`
+- `gov-project` → načti `../wiki-autoresearch/references/gov-project.md`
 
 k načtení cílů a omezení výzkumu. Tento soubor je uživatelsky konfigurovatelný. Definuje, kterým zdrojům dávat přednost, jak hodnotit míru spolehlivosti (confidence) a jakákoli omezení specifická pro danou doménu.
 
@@ -73,7 +73,7 @@ Kolo 3. Kontrola syntézy (volitelně, pokud zůstávají mezery)
 8. Pokud stále existují velké rozpory nebo chybějící části: jeden další cílený průchod
 9. Jinak: pokračuj k zakládání
 
-Max kol: 4 (jak je nastaveno v profilu). Skonči, když je dosažena hloubka nebo max kol.
+Max kol: podle aktivního profilu (viz sekce Omezení). Skonči, když je dosažena hloubka nebo max kol.
 ```
 
 
@@ -190,7 +190,7 @@ Nikdy si zdroj nevymýšlej a neuváděj nedohledatelný odkaz.
 1. Aktualizuj wiki. Přidej všechny nové stránky.
 2. Připoj na `wiki/log.md` (NA ZAČÁTEK):
    ```
-   ## [YYYY-MM-DD] autoresearch | [Topic]
+   ## [YYYY-MM-DD] write-article | [Topic]
    - Rounds: N
    - Sources found: N
    - Pages created: [[Page 1]], [[Page 2]], ...
@@ -229,7 +229,7 @@ Open questions filed: N
 
 ## Omezení
 
-Respektuj omezení z načteného profilu z `references/*`:
+Respektuj omezení z načteného profilu (`../wiki-autoresearch/references/*`):
 - Max kol
 - Max stránek za relaci
 - Pravidla pro hodnocení míry jistoty (confidence)

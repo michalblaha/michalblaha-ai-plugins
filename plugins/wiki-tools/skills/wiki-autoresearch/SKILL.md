@@ -8,7 +8,7 @@ description: >
   Triggers on: "/wiki-autoresearch", "autoresearch","prozkoumej do hloubky", "research [topic]", "deep dive into [topic]",
   "investigate [topic]", "find everything about [topic]", "research and file",
   "go research", "build a wiki on".
-allowed-tools: Read Write Edit Glob Grep WebFetch WebSearch
+allowed-tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
 ---
 
 # wiki-autoresearch: Autonomní výzkumná smyčka
@@ -51,7 +51,7 @@ Kolo 3. Kontrola syntézy (volitelně, pokud zůstávají mezery)
 8. Pokud stále existují velké rozpory nebo chybějící části: jeden další cílený průchod
 9. Jinak: pokračuj k zakládání
 
-Max kol: 4 (jak je nastaveno v profilu). Skonči, když je dosažena hloubka nebo max kol.
+Max kol: podle aktivního profilu (default: 3, gov-project: 5). Skonči, když je dosažena hloubka nebo max kol.
 ```
 
 

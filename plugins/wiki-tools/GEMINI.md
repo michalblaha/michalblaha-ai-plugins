@@ -18,8 +18,10 @@ ln -s "$(pwd)/skills" ~/.gemini/skills/wiki-tools
 | `wiki-query` | Odpovídá na otázky z wiki ve třech hloubkových módech |
 | `wiki-lint` | Health check: orphans, dead links, zastaralá tvrzení, mezery |
 | `wiki-autoresearch` | Autonomní výzkumná smyčka: search → fetch → synthesize → file |
+| `write-article` | Investigativní článek: rešerše, striktní analýza, korektura a kontrola zdrojů |
 | `html-clean` | Čistí webové stránky před ingestem (úspora 40–60 % tokenů) |
 | `obsidian-markdown` | Reference na Obsidian Flavored Markdown |
+| `humanizer` | Detekce a odstranění AI vzorců v textu (auto-detekce CZ / EN) |
 
 Setup vaultu provedete tím, že agentovi popíšete účel vaultu (např. „set up a wiki for state contracts research") — agent vytvoří strukturu složek a hlavní soubory.
 

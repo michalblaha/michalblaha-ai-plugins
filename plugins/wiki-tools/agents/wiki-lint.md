@@ -27,8 +27,8 @@ Dostaneš:
 Veškerou metodiku — seznam kontrol, formát reportu, konvence pojmenování i pravidla — drží skill `wiki-tools:wiki-lint`. Neduplikuj ji, řiď se jí.
 
 1. Vyvolej skill `wiki-tools:wiki-lint` (přes nástroj `Skill`) a načti jeho kompletní postup.
-2. Proveď **všech 8 lint kontrol** v pořadí, jak je skill definuje:
-   orphans → dead links → stale claims → chybějící stránky → chybějící křížové reference → mezery ve frontmatter → prázdné sekce → zastaralé záznamy v rejstříku.
+2. Proveď **všech 10 lint kontrol** v pořadí, jak je skill definuje:
+   orphans → dead links → stale claims → chybějící stránky → chybějící křížové reference → mezery ve frontmatter → prázdné sekce → zastaralé záznamy v rejstříku → validní md formát → executive summary.
 3. Aplikuj i **kontrolu konvencí pojmenování** a **kontrolu stylu psaní** dle skillu.
 4. Pokud rozsah pokrývá celý vault, zohledni i Dataview dashboard a canvas mapu tak, jak je skill popisuje.
 

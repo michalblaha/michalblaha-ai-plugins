@@ -1,7 +1,7 @@
 ---
 name: wiki-ingest
 description: "Ingest zdrojů do Obsidian wiki vaultu. Načte zdroj, extrahuje entity a koncepty, vytvoří nebo aktualizuje wiki stránky, křížově odkazuje a zaloguje operaci. Podporuje soubory, URL a batch mód. Triggers on: ingest, process this source, add this to the wiki, read and file this, batch ingest, ingest all of these, ingest this url."
-allowed-tools: Read Write Edit Glob Grep Bash WebFetch
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch
 ---
 
 # wiki-ingest: Ingest zdrojů
@@ -148,7 +148,7 @@ Tokenový rozpočet je důležitý. Při ingestu dodržuj:
 - Čti maximálně 3–5 existujících stránek na ingest. Pokud potřebuješ 10+, čteš příliš široko.
 - Pro chirurgické úpravy používej PATCH. Nikdy nečti celý soubor jen kvůli aktualizaci jednoho pole.
 - Drž wiki stránky krátké. Max 100–300 řádků. Pokud stránka přeroste 300 řádků, rozděl ji.
-- Použij vyhledávání (`/search/simple/`) pro nalezení konkrétního obsahu bez čtení plných stránek.
+- Použij Grep pro nalezení konkrétního obsahu bez čtení plných stránek.
 
 ---
 

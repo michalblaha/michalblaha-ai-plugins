@@ -1,7 +1,7 @@
 ---
 name: obsidian-markdown
 description: "Pište správný Obsidian Flavored Markdown: wikilinky, embeds, callouts, properties, tagy, highlighty, math a canvas syntax. Tento skill referencujte při vytváření nebo úpravě libovolné wiki stránky. Triggers on: write obsidian note, obsidian syntax, wikilink, callout, embed, obsidian markdown, wikilink format, callout syntax, embed syntax, obsidian formatting, how to write obsidian markdown."
-allowed-tools: Read Write Edit
+allowed-tools: Read, Write, Edit
 ---
 
 # obsidian-markdown: Obsidian Flavored Markdown

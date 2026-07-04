@@ -23,6 +23,7 @@ Inicializuj wiki vault v aktuálním projektu (cwd) podle konvencí pluginu `wik
    wiki/index.md         hlavní katalog (TOC)
    wiki/log.md           append-only záznam operací
    wiki/hot.md           cache nedávného kontextu
+   wiki/overview.md      výkonné shrnutí vaultu
    ```
 
 4. **Iniciální obsah souborů** zakládej jen u nově vytvořených (existující obsah nikdy nepřepisuj):
@@ -57,7 +58,7 @@ Inicializuj wiki vault v aktuálním projektu (cwd) podle konvencí pluginu `wik
    Append-only záznam operací nad wiki. Nové záznamy přidávej na začátek.
 
    ## [<YYYY-MM-DD>] init | wiki vault inicializován
-   - Vytvořil command `/create` z pluginu `wiki-tools`.
+   - Vytvořil command `/wiki-create` z pluginu `wiki-tools`.
    ```
 
    `wiki/hot.md`:
@@ -75,6 +76,21 @@ Inicializuj wiki vault v aktuálním projektu (cwd) podle konvencí pluginu `wik
    _Zatím prázdné._
    ```
 
+   `wiki/overview.md`:
+   ```markdown
+   ---
+   type: overview
+   title: "Overview"
+   updated: <YYYY-MM-DD>
+   ---
+
+   # Overview
+
+   Výkonné shrnutí vaultu — co pokrývá, hlavní zjištění, stav. Aktualizuj, když se změní celkový obraz.
+
+   _Zatím prázdné. První obsah doplní ingest nebo autoresearch._
+   ```
+
    Datum doplň jako reálné dnešní `YYYY-MM-DD`.
 
 5. **Report uživateli** — shrň, co bylo vytvořeno, co existovalo a bylo ponecháno:
@@ -89,11 +105,12 @@ Inicializuj wiki vault v aktuálním projektu (cwd) podle konvencí pluginu `wik
    wiki/index.md: created | already existed
    wiki/log.md:   created | already existed
    wiki/hot.md:   created | already existed
+   wiki/overview.md: created | already existed
    ```
 
 ## Pravidla
 
-- **Idempotence**: opakované spuštění `/create` nesmí nic přepsat ani duplikovat.
+- **Idempotence**: opakované spuštění `/wiki-create` nesmí nic přepsat ani duplikovat.
 - **Neptej se zbytečně**: pokud cwd vypadá jako rozumný root projektu (obsahuje `.git/`, `package.json`, `pyproject.toml`, `README.md` apod.), inicializuj v něm bez dotazu.
 - **Nevytvářej** `wiki/sources/`, `wiki/entities/`, `wiki/concepts/` ani další doménové podsložky — ty vznikají dynamicky až při prvním ingestu/autoresearchi (viz „Detekce uspořádání vaultu" ve skillu `wiki-autoresearch`).
 - **Nečti `raw/`** ani existující obsah `wiki/` — jen ověřuj existenci přes `test -d` / `test -f` v `Bash`.

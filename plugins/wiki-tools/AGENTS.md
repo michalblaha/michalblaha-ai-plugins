@@ -25,8 +25,10 @@ ln -s "$(pwd)/skills" ~/.opencode/skills/wiki-tools
 | `wiki-query` | query, what do you know about, query quick:, query deep: |
 | `wiki-lint` | lint the wiki, health check, find orphans |
 | `wiki-autoresearch` | autoresearch, autonomous research loop |
+| `write-article` | write-article, napiš článek (investigativní článek s korekturou a kontrolou zdrojů) |
 | `html-clean` | clean this url, defuddle |
 | `obsidian-markdown` | reference Obsidian Markdown syntaxe (wikilinks, callouts, frontmatter) |
+| `humanizer` | humanize, odeber AI vzorce, zlidšti text (auto-detekce CZ / EN) |
 
 Setup vaultu provedete tím, že agentovi popíšete účel vaultu (např. „nastav mi wiki pro výzkum státních zakázek") — agent přečte tento soubor, projektový `CLAUDE.md` a vytvoří strukturu složek a hlavní soubory (`wiki/index.md`, `wiki/hot.md`, `wiki/log.md`, `wiki/overview.md`).
 

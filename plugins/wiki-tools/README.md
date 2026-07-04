@@ -1,7 +1,7 @@
 # wiki-tools
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.3.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.8.1-blue)](.claude-plugin/plugin.json)
 
 Trvalá kumulující se znalostní báze pro **Claude Code + Obsidian**. Ingest zdrojů, dotazy s citacemi, autonomní výzkum a health check vaultu.
 
@@ -47,8 +47,11 @@ Otevřete tuto složku přímo v Obsidianu: **Manage Vaults → Open folder as v
 | `ingest all of these` | `wiki-ingest` (paralelní agent) | Dávkové zpracování více zdrojů + křížové propojení |
 | `what do you know about X?` | `wiki-query` | Hot cache → rejstřík → relevantní stránky → odpověď s citacemi |
 | `/wiki-autoresearch [topic]` | `wiki-autoresearch` | Autonomní výzkumná smyčka: vyhledá, stáhne, syntetizuje, založí |
+| `/write-article [profil] [zadání]` | `write-article` | Investigativní článek: rešerše, striktní pravidla analýzy, korektura češtiny a kontrola zdrojů |
 | `lint the wiki` | `wiki-lint` | Health check: orphans, dead links, mezery, návrhy oprav |
 | `clean this url` | `html-clean` | Defuddle: strip ads, navigace a boilerplate před ingestem |
+| `/humanizer [text]` | `humanizer` | Detekce a odstranění AI vzorců v textu (auto-detekce CZ / EN) |
+| `/wiki-create` | — (command) | Idempotentní inicializace wiki vaultu v aktuálním projektu |
 
 Doplňkový skill `obsidian-markdown` slouží jako referenční syntax pro psaní Obsidian Flavored Markdown.
 

@@ -3,8 +3,8 @@
 Tato složka je Claude Code / Codex plugin a zároveň Obsidian vault. Postaveno na vzoru LLM Wiki od Andreje Karpathyho.
 
 **Název pluginu:** `wiki-tools`
-**Skills:** `wiki-ingest`, `wiki-query`, `wiki-lint`, `wiki-autoresearch`, `html-clean`, `obsidian-markdown`, `humanizer`
-**Příkazy:** `/wiki-autoresearch`
+**Skills:** `wiki-ingest`, `wiki-query`, `wiki-lint`, `wiki-autoresearch`, `write-article`, `html-clean`, `obsidian-markdown`, `humanizer`
+**Příkazy:** `/wiki-autoresearch`, `/wiki-create`
 **Cesta k vaultu:** Tento adresář (otevřete přímo v Obsidianu)
 
 ## Účel
@@ -190,9 +190,12 @@ Wiki NEČTĚTE pro obecné programátorské dotazy nebo pro věci, které jsou j
 | `wiki-query` | `query: [question]`, `what do you know about...` — odpovědi z obsahu wiki |
 | `wiki-lint` | `lint the wiki` — health check |
 | `wiki-autoresearch` | `/wiki-autoresearch [topic]` — autonomní výzkumná smyčka |
+| `write-article` | `/write-article [profil] [zadání]` — investigativní článek s korekturou a kontrolou zdrojů |
 | `html-clean` | `clean this url`, `defuddle` — čištění webových stránek |
 | `obsidian-markdown` | reference na syntax Obsidian Flavored Markdown |
 | `humanizer` | `/humanizer` — detekce a humanizace AI textu (auto-detekce jazyka: CZ / EN) |
+
+Příkaz `/wiki-create` inicializuje wiki vault v aktuálním projektu (idempotentní scaffold: `CLAUDE.md`, `raw/`, `wiki/` + hlavní soubory).
 
 ## Klíčová pravidla
 

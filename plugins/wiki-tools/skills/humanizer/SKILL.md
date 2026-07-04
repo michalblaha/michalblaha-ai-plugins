@@ -1,7 +1,7 @@
 ---
 name: humanizer
 description: "Detect and humanize AI-generated text. Auto-detects language: Czech text → applies 27 Czech-specific AI patterns (humanizer-czech); other languages → applies 16 English AI patterns (humanize-ai-text). Detects, reports, and transforms text to sound natural and human-written. Triggers on: /humanizer, humanize this text, remove AI patterns, humanize, make this sound human, odeber AI vzorce, humanizuj, zlidšti text, humanize ai text, detect ai patterns."
-allowed-tools: Read Write Edit AskUserQuestion
+allowed-tools: Read, Write, Edit, AskUserQuestion
 ---
 
 # Humanizer: AI Text Detector & Transformer

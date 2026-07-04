@@ -1,7 +1,7 @@
 ---
 name: html-clean
 description: "Odstraňuje rušivé prvky z webových stránek před ingestem do wiki. Maže reklamy, navigaci, hlavičky, patičky a boilerplate: nechává čistý čitelný markdown, který šetří 40–60 % tokenů. Triggers on: defuddle, clean this page, strip this url, fetch and clean, clean web content before ingesting, strip ads, remove clutter, clean URL content, readable markdown from URL."
-allowed-tools: Read Bash
+allowed-tools: Read, Bash
 ---
 
 # html-clean: Čistič webových stránek

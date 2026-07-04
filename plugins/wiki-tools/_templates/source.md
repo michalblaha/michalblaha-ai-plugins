@@ -5,7 +5,6 @@ source_type: article
 author: ""
 date_published: <% tp.date.now("YYYY-MM-DD") %>
 url: ""
-confidence: medium
 key_claims:
   - ""
 created: <% tp.date.now("YYYY-MM-DD") %>

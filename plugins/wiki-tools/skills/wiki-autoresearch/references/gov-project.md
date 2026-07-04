@@ -96,7 +96,7 @@ Použít pouze pokud ve vaultu zatím pro daný typ neexistuje žádná stránka
 | `source` + `source_type: media`              | `wiki/media/`        |
 | `source` (ostatní)                           | `wiki/zdroje/`       |
 | `concept`                                    | `wiki/myslenky/`     |
-| `synthesis`                                  | `wiki/otazky/`       |
+| `synthesis`                                  | `wiki/reserse/`       |
 
 Pokud má vault preferovanou jinou konvenci, detekce ji použije automaticky.
 

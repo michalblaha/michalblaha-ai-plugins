@@ -1,7 +1,7 @@
 ---
 name: wiki-query
 description: "Odpovídá na otázky pomocí Obsidian wiki vaultu. Nejprve čte hot cache, pak rejstřík, pak relevantní stránky. Syntetizuje odpovědi s citacemi. Dobré odpovědi ukládá zpět jako wiki stránky. Podporuje quick, standard a deep mód. Triggers on: what do you know about, query:, what is, explain, summarize, find in wiki, search the wiki, based on the wiki, wiki query quick, wiki query deep."
-allowed-tools: Read Glob Grep
+allowed-tools: Read, Glob, Grep
 ---
 
 # wiki-query: Dotazy nad wiki
