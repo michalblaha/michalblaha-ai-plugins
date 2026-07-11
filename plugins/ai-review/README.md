@@ -1,7 +1,7 @@
 # ai-review
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.4.0-blue)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.4.1-blue)](.claude-plugin/plugin.json)
 
 Nezávislé AI review workflows — **druhý názor** a **cross-check** napříč Claude (Anthropic), Codex (OpenAI) a Antigravity / agy (Google).
 

@@ -56,7 +56,7 @@ Po jednom retry přepni na jiného providera a selhání poznač do *Nejistot*. 
 WORK=$(mktemp -d)
 
 # Jednoduchá otázka
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
   --output-last-message "$WORK/answer.txt" \
   "Tvá otázka tady"
 cat "$WORK/answer.txt"
@@ -76,7 +76,7 @@ cat > "$WORK/schema.json" <<'EOF'
 }
 EOF
 
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
   --output-schema "$WORK/schema.json" \
   --output-last-message "$WORK/result.json" \
   "Analyzuj [téma]. Vrať strukturované zhodnocení."
@@ -142,9 +142,10 @@ cat "$WORK/result.json"
 
 | Volba | Účel |
 |---|---|
-| `-m gpt-5.5` | Aktuální frontier model (doporučeno pro hloubkovou kontrolu) |
-| `-m gpt-5.5-codex` | Codex-optimalizovaná verze 5.5 pro agentické kódování |
-| `-m gpt-5.4-mini` | Rychlý a levný pro jednoduché úlohy |
+| `-m gpt-5.6` | Alias na `gpt-5.6-sol` — frontier model (doporučeno pro hloubkovou kontrolu) |
+| `-m gpt-5.6-sol` | Flagship pro komplexní úlohy a agentické kódování |
+| `-m gpt-5.6-terra` | Vyvážený „everyday" model (intelligence vs. cena) |
+| `-m gpt-5.6-luna` | Rychlý a levný pro jednoduché a vysokoobjemové úlohy |
 | `-c 'model_reasoning_effort="high"'` | Reasoning effort. Hodnoty: `low`, `medium`, `high`, `xhigh` |
 | `--output-schema file.json` | Strukturovaný JSON s validací schématu |
 | `--output-last-message file.txt` | Uložení odpovědi do souboru |
@@ -189,11 +190,11 @@ cat "$WORK/result.json"
 
 | Úloha | Codex (OpenAI) | Antigravity / agy (Google) | Claude Code (Anthropic) |
 |---|---|---|---|
-| Komplexní rešerše / architektura | `gpt-5.5` + high/xhigh | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-7` + xhigh |
-| Rychlé code review | `gpt-5.4-mini` | `"Gemini 3.5 Flash (High)"` | `haiku` |
-| Bezpečnostní audit (hluboký) | `gpt-5.5` + xhigh | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-7` + xhigh |
-| Strukturovaný výstup s validací | `gpt-5.5` + `--output-schema` | — (bez schema validace) | `claude-opus-4-7` + `--json-schema` |
-| Faktografická verifikace | `gpt-5.5` (kombinuj se zdroji) | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-7` |
+| Komplexní rešerše / architektura | `gpt-5.6` + high/xhigh | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-7` + xhigh |
+| Rychlé code review | `gpt-5.6-luna` | `"Gemini 3.5 Flash (High)"` | `haiku` |
+| Bezpečnostní audit (hluboký) | `gpt-5.6` + xhigh | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-7` + xhigh |
+| Strukturovaný výstup s validací | `gpt-5.6` + `--output-schema` | — (bez schema validace) | `claude-opus-4-7` + `--json-schema` |
+| Faktografická verifikace | `gpt-5.6` (kombinuj se zdroji) | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-7` |
 | Multi-model konsenzus | spusť všechny tři a porovnej | spusť všechny tři a porovnej | spusť všechny tři a porovnej |
 
-Aliasy (`opus`, `sonnet`, `haiku`, `gpt-5.5`) ukazují na aktuálně doporučenou verzi providera; pro reprodukovatelnost pinuj konkrétní verzi modelu.
+Aliasy (`opus`, `sonnet`, `haiku`, `gpt-5.6`) ukazují na aktuálně doporučenou verzi providera; pro reprodukovatelnost pinuj konkrétní verzi modelu.

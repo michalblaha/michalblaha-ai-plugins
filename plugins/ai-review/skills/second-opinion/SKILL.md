@@ -77,7 +77,7 @@ Minimal one-shot examples. Full patterns (structured/schema output, images, work
 WORK=$(mktemp -d)
 
 # Codex (OpenAI)
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
   --output-last-message "$WORK/codex.txt" \
   "Your question here"
 cat "$WORK/codex.txt"
@@ -208,7 +208,7 @@ Get second opinions from all three providers and compare:
 WORK=$(mktemp -d)
 
 # 1. Ask Codex
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
   --output-last-message "$WORK/codex_opinion.txt" \
   "Should we use Redis or PostgreSQL for session storage in e-commerce app?"
 

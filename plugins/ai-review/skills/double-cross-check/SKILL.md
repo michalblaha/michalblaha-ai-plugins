@@ -129,7 +129,7 @@ Minimální příklady — kompletní vzory (strukturovaný výstup se schémate
 WORK=$(mktemp -d)
 
 # Codex (OpenAI)
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
   --output-last-message "$WORK/codex.txt" \
   "Tvá otázka tady"
 cat "$WORK/codex.txt"
@@ -174,7 +174,7 @@ cat "$WORK/factcheck.txt"
 ```bash
 WORK=$(mktemp -d)
 
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="high"' \
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
   --output-last-message "$WORK/dataset_review.txt" \
   "Mám dataset přiřazení X účtů osobám (CSV níže). Najdi:
    - podezřelé záznamy (false-positive matching, různé osoby stejné jméno)
@@ -205,7 +205,7 @@ cat "$WORK/arch.txt"
 
 ```bash
 WORK=$(mktemp -d)
-codex -a never exec --skip-git-repo-check -m gpt-5.5 -c 'model_reasoning_effort="xhigh"' \
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="xhigh"' \
   --output-last-message "$WORK/security.txt" \
   "Bezpečnostní review následujícího kódu:
 
@@ -316,7 +316,7 @@ Nikdy nezapracovávej doporučení jen proto, že ho uvedl jiný model. Zapracuj
 
 Jasně odděl:
 
-- **Druhý názor** — který provider/model byl použit (např. *"OpenAI / Codex – gpt-5.5"* nebo *"Konsenzus: Codex + Gemini"*) a stručné shrnutí, co řekl.
+- **Druhý názor** — který provider/model byl použit (např. *"OpenAI / Codex – gpt-5.6"* nebo *"Konsenzus: Codex + Gemini"*) a stručné shrnutí, co řekl.
 - **Přijaté nálezy** — co jsi po vlastním ověření přijal/a jako pravdivé. Pro každý: lokace + důkaz nebo zdůvodnění.
 - **Odmítnuté nálezy** — co jsi nepotvrdil/a a proč.
 - **Změny nebo doporučení** — co bylo provedeno nebo co má následovat.
