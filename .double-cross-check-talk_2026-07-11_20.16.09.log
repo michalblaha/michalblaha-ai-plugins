@@ -1,0 +1,1067 @@
+=== Double Cross-Check Log: 2026-07-11_20.16.09 ===
+Provider: OpenAI/Codex (default model, high) + Google/Gemini 3.1 Pro (High) via agy
+Subject: prompty všech skills v pluginu ai-review (2 skills + 2 shared references)
+
+--- Prompt ---
+Posuď kriticky následující sadu skill-promptů pro Claude Code plugin "ai-review".
+Plugin má dva skilly (second-opinion, double-cross-check) a dvě sdílené reference (cli-reference.md, trusted-sources.md), které dávají AI agentovi instrukce, jak zavolat jiný AI CLI model (Codex/OpenAI, agy/Gemini, Claude Code) pro nezávislý druhý názor a cross-check.
+
+Nehledej potvrzení, hledej chyby. Zaměř se na:
+- vnitřní nekonzistence mezi soubory (rozdílné flagy, názvy modelů, workflow),
+- chybné nebo neúplné bash příklady (proměnné, které nejsou nastavené; $WORK/answer.txt použité v logu, ale nikde neplněné; race conditions),
+- slabé nebo chybné předpoklady o CLI (neexistující flagy, špatné názvy modelů/tierů, chybějící error handling),
+- opomenuté hrany: co když CLI není nainstalované, prázdný výstup, sandbox, timeout,
+- rozpory v instrukcích pro agenta (allowed-tools vs. reálně použité příkazy),
+- redundanci a udržovatelnost (duplicitní obsah, který se rozjede),
+- bezpečnostní/provozní rizika (auto-commit logu, --dangerously-skip-permissions).
+
+U každého nálezu uveď: závažnost (blocker/major/minor/nit), konkrétní soubor a místo, důvod, a doporučenou opravu. Buď konkrétní, cituj řádky. Nevymýšlej problémy, kde nejsou.
+
+Materiál:
+=== FILE: double-cross-check/SKILL.md ===
+---
+name: double-cross-check
+description: "Ověř výsledek nezávislým modelem od jiného providera — Codex (OpenAI), Antigravity / agy (Google) nebo Claude Code (Anthropic). Použij na fráze: 'získej druhý názor', 'ověř z jiného modelu', 'zkontroluj přes Codex/Antigravity/Claude Code', 'porovnej názory modelů', 'cross-check', 'dvojitá kontrola', 'fact-check', 'ověř fakta'. Vhodné pro ověřování faktografických dat a investigativní rešerše, kontrolu architektonických rozhodnutí, bezpečnostní audit kódu, porovnávání implementačních přístupů a multi-model konsenzus u rozhodnutí s vyššími stakes. Pro běžný dotaz, kde stačí jedna odpověď, skill nepoužívej — je drahý a pomalý. Používej cíleně."
+
+allowed-tools:
+  - AskUserQuestion
+  - Read
+  - Glob
+  - Grep
+  - WebSearch
+  - WebFetch
+  - Bash(command -v *)
+  - Bash(codex --version:*)
+  - Bash(codex -a never exec:*)
+  - Bash(claude --version:*)
+  - Bash(claude -p:*)
+  - Bash(date:*)
+  - Bash(agy -p:*)
+  - Bash(agy --print:*)
+  - Bash(agy --prompt:*)
+  - Bash(agy models:*)
+  - Bash(mktemp:*)
+  - Bash(mkdir:*)
+  - Bash(cat:*)
+  - Bash(echo:*)
+  - Bash(git diff:*)
+  - Bash(git log:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+
+argument-hint: "otázka / soubor / rozhodnutí k ověření"
+
+---
+
+# Double cross-check: kontrola jiným AI modelem
+
+Získej nezávislý pohled od OpenAI (přes Codex CLI), Google (přes Antigravity CLI — `agy`) nebo Anthropic (přes Claude Code CLI) na výsledek, který sám/sama produkuješ. Smysl: chytit chyby, na které jsi slepý/á — ne potvrdit si vlastní odpověď.
+
+**Sdílené reference** (cesty relativní k adresáři tohoto skillu):
+
+- `../references/cli-reference.md` — kontrola dostupnosti, autentizace, povinné flagy, ošetření selhání, kompletní volací vzory, tabulky voleb CLI a doporučené modely pro všechny tři providery. **Načti před prvním voláním providera.**
+- `../references/trusted-sources.md` — kdy AI cross-check nestačí: nezávislé zdroje a seznam důvěryhodných médií.
+
+---
+
+## 1. Identifikuj sebe sama
+
+Než začneš, urči, který model skill právě spouští, podle prostředí (system prompt, název CLI, autentizační kontext). Ověřovatele vybírej **z těch zbývajících**:
+
+- Pokud jsi **Claude** → ověřuje **Codex** a/nebo **agy** (s Gemini modelem).
+- Pokud jsi **GPT/Codex** → ověřuje **Claude** a/nebo **agy** (s Gemini modelem).
+- Pokud jsi **Gemini** → ověřuje **Codex** a/nebo **Claude**.
+
+Nikdy se neověřuj stejným modelem, který odpověď vyrobil — sdílí stejné slabiny. Pozn.: `agy` hostí kromě Gemini i Claude a GPT-OSS modely. Pro účel cross-checku ho používej výhradně s `Gemini …` modelem (jinak ztrácíš nezávislost rodiny).
+
+---
+
+## 2. Předpoklady prostředí
+
+Skill předpokládá shellové prostředí s nainstalovanými relevantními CLI nástroji. **V prostředí bez shellu** (čistý chat bez bash toolu) skill nelze použít — místo něj nabídni uživateli, ať verifikační prompt pošle do jiného modelu ručně, nebo použij web search pro grounding faktů.
+
+Detaily drží `../references/cli-reference.md`. Nepodkročitelné minimum:
+
+- Před použitím ověř dostupnost CLI (snippet a autentizace v referenci §1).
+- `codex`, `agy` a `claude` spouštěj **přímo v systému, NE v sandboxu** — tam jim chybí login a nefungují.
+- Každé volání Codexu má tvar `codex -a never exec --skip-git-repo-check ...`; při selhání fallback na `codex:codex-rescue` (jeden retry), pak přepni providera.
+- U každého volání kontroluj exit kód — **prázdný výstupní soubor znamená selhání volání**, ne prázdnou odpověď modelu. Po jednom retry přepni providera a selhání poznač do *Nejistot*.
+- Pro mezivýstupy používej `WORK=$(mktemp -d)`.
+
+---
+
+## 3. Workflow
+
+1. **Získej ověření** od jednoho nebo více jiných modelů. Pro běžný cross-check stačí jeden; multi-model konsenzus si nech na rozhodnutí s vyššími stakes (publikovatelný výstup, bezpečnostní rozhodnutí, faktografická tvrzení v investigativním textu).
+2. **Pročti zjištění bod po bodu.** Pro každou údajnou chybu: ověř ji nezávisle (zdroj, dokumentace, web search, vlastní úvaha) — kontrolor se může mýlit stejně jako autor. Zapracuj jen ty, které ti potvrzená data podpoří.
+3. **Re-check.** Opravenou verzi pošli stejnému (nebo jinému) kontrolorovi znovu.
+4. **Iterace max. 3×.** Skonči dřív, pokud kontrola nevrací žádné nové připomínky. Po 3 iteracích **shrň zbývající otevřené body uživateli k rozhodnutí** — neztrácej se v nekonečném ladění drobností, na kterých se modely nedohodnou.
+5. **Ulož log celé výměny** (všechny iterace) do rootu projektu — viz sekce „Uložení logu konverzace" níže.
+
+---
+
+## 4. Kdy AI cross-check nestačí
+
+AI modely sdílejí trénovací data a s nimi i halucinace. Když ověřuješ **fakt** (existence osoby/účtu, datum, hodnota, citát, právní/historický nárok), nejsilnější kontrola není další model, ale **nezávislý zdroj** — strategii a seznam důvěryhodných médií drží `../references/trusted-sources.md`.
+
+Použij AI cross-check pro **uvažování, strukturu, logické skoky, code review, návrhová rozhodnutí**. Pro fakta ho použij jen jako první filtr a pak ověř proti zdroji.
+
+---
+
+## 5. Prompt engineering pro silnější verifikaci
+
+Slabý prompt → slabá kontrola. Místo "Je tohle správně?" použij vstup uživatele a doporučený prompt.
+
+### Doporučený prompt pro externí model
+
+Použij tento tvar zadání a doplň jen nezbytný kontext:
+
+(Pokud je `$ARGUMENTS` prázdné, ověř výstup z předchozího kola konverzace. Pokud je to cesta k souboru, načti ho. Pokud je to volný popis úlohy, použij ho jako kontext.)
+
+```text
+Posuď následující zadání kriticky. Nehledej potvrzení, hledej chyby.
+
+Zaměř se na:
+- chybné nebo slabé předpoklady,
+- bezpečnostní a provozní rizika,
+- opomenuté alternativy,
+- nesoulad s běžnou praxí,
+- tvrzení, která potřebují primární zdroj nebo test.
+
+U každého nálezu uveď:
+- závažnost,
+- konkrétní důvod,
+- jak nález ověřit,
+- doporučenou opravu nebo další krok.
+
+Zadání:
+$ARGUMENTS
+
+a přidej potřebný kontext, pokud je potřeba.
+```
+
+---
+
+## 6. Rychlé vzory volání
+
+Minimální příklady — kompletní vzory (strukturovaný výstup se schématem, obrázky, workspace grounding, levnější tiery) drží `../references/cli-reference.md` §3.
+
+```bash
+WORK=$(mktemp -d)
+
+# Codex (OpenAI)
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
+  --output-last-message "$WORK/codex.txt" \
+  "Tvá otázka tady"
+cat "$WORK/codex.txt"
+
+# Antigravity / agy (Google) — vždy Gemini model
+agy -p "Tvá otázka tady" --model "Gemini 3.1 Pro (High)" > "$WORK/agy.txt"
+cat "$WORK/agy.txt"
+
+# Claude Code (Anthropic)
+claude -p "Tvá otázka tady" --model opus --output-format text > "$WORK/claude.txt"
+cat "$WORK/claude.txt"
+```
+
+Pro schema-validovaný strukturovaný výstup použij Codex `--output-schema` nebo Claude `--json-schema` (reference §3); `agy` schema validaci nemá — JSON tvar vynucuj v promptu.
+
+**Pozn.:** Spuštěná instance běží nezávisle na aktuální session — kontrolující AI CLI nemá tvůj kontext, dostává opravdu čerstvý pohled.
+
+---
+
+## 7. Příklady použití
+
+### Faktografická verifikace (typický investigativní use-case)
+
+```bash
+WORK=$(mktemp -d)
+
+claude -p "Ověř následující tvrzení. Pro každé řekni: pravdivé / nepravdivé / nelze ověřit + důkaz nebo důvod nejistoty. Buď skeptický, nepředpokládej.
+
+Tvrzení:
+$(cat tvrzeni.txt)
+
+Pokud potřebuješ pro ověření primární zdroj a nemáš ho, řekni 'potřebuji zdroj X' místo odhadu." \
+  --model opus --effort high --output-format text > "$WORK/factcheck.txt"
+
+cat "$WORK/factcheck.txt"
+```
+
+**Důležité:** model nemá přístup k živým zdrojům, takže "pravdivé" znamená "konzistentní s trénovacími daty modelu" — ne "ověřeno proti realitě". Pro fakta novější než cutoff modelu, nebo pro tvrzení o konkrétních osobách/účtech/datech, zkombinuj s web search nebo strukturovaným zdrojem (Wikidata, psp.cz, ARES, justiční databáze atd.).
+
+### Cross-reference strukturovaného datasetu
+
+```bash
+WORK=$(mktemp -d)
+
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
+  --output-last-message "$WORK/dataset_review.txt" \
+  "Mám dataset přiřazení X účtů osobám (CSV níže). Najdi:
+   - podezřelé záznamy (false-positive matching, různé osoby stejné jméno)
+   - chybějící atribuce (osoba bez účtu — opravdu žádný, nebo nedohledán?)
+   - nesrovnalosti mezi sloupci
+   - vzorky vyžadující ruční ověření
+
+   Pro každý nález: ID řádku + důvod podezření + konkrétní návrh, jak ověřit.
+
+   Data:
+   $(cat dataset.csv)"
+
+cat "$WORK/dataset_review.txt"
+```
+
+### Kontrola architektury
+
+```bash
+WORK=$(mktemp -d)
+agy -p "Posuď toto architektonické rozhodnutí: [popis].
+  Buď skeptický. Hodnoť: škálovatelnost, udržovatelnost, bezpečnostní rizika, alternativy.
+  Pro každou výhradu: konkrétní scénář, kde rozhodnutí selže." \
+  --model "Gemini 3.1 Pro (High)" > "$WORK/arch.txt"
+cat "$WORK/arch.txt"
+```
+
+### Bezpečnostní audit
+
+```bash
+WORK=$(mktemp -d)
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="xhigh"' \
+  --output-last-message "$WORK/security.txt" \
+  "Bezpečnostní review následujícího kódu:
+
+   $(cat src/auth.py)
+
+   Hledej: vstupní validaci, autentizaci/autorizaci, expozici dat, race conditions, injection.
+   Pro každou nalezenou zranitelnost: lokace (řádek), exploit scénář, oprava."
+cat "$WORK/security.txt"
+```
+
+### Code review
+
+```bash
+WORK=$(mktemp -d)
+claude -p "Review následujícího diffu na: bugy, výkonnostní problémy, udržovatelnost, test coverage gaps.
+  Pro každou připomínku: lokace + závažnost (blocker / major / minor / nit) + návrh opravy.
+  Buď skeptický k autorově optimismu.
+
+  Diff:
+  $(git diff main..HEAD -- src/)" \
+  --model opus --effort high --output-format text > "$WORK/review.txt"
+cat "$WORK/review.txt"
+```
+
+Pozn.: u příkladů s `$(cat soubor)` nejdřív ověř, že soubor existuje — chybějící soubor by do promptu vložil prázdný obsah.
+
+---
+
+## 8. Co dělat při neshodě modelů
+
+Když si Codex a agy (Gemini) protiřečí, neber žádný z nich za autoritu:
+
+1. **Konkrétnější tvrzení s odkazem na zdroj > obecné tvrzení.** Pokud Codex říká "X je špatně, viz CVE-2024-1234" a agy říká "X je v pořádku", začni s tím konkrétním a ověř CVE.
+2. **Pro fakta zvol nezávislý zdroj** (web search, dokumentace, registry) místo třetího modelu — modely sdílejí halucinace, takže "tie-breaker" třetím modelem je iluze nezávislosti.
+3. **Pro názory a preference** (např. "Redis vs PostgreSQL pro session storage") neshoda často odráží reálný trade-off, ne chybu. Surface obě perspektivy uživateli s tím, na čem rozhodnutí závisí.
+4. **Pokud spor zůstává nerozhodnutý**, přiznej to v odpovědi explicitně — neforsírovej falešný konsenzus.
+
+---
+
+## 9. Náklady a latence
+
+Multi-model cross-check není zadarmo. Reasoning modely na high/xhigh effort běží desítky sekund a stojí znatelně víc než single call. Doporučení:
+
+- **Single cross-check** (jeden další model): default pro většinu kontrol.
+- **Multi-model konsenzus** (všechny tři): nech si na rozhodnutí, kde stojí čas a peníze za to — publikovatelný výstup, faktografická tvrzení v investigativním materiálu, bezpečnostně-citlivý kód, architektonické rozhodnutí s dlouhodobým dopadem.
+- **Levnější tier pro rychlé checky:** viz tabulka „Doporučení modelu podle úlohy" v `../references/cli-reference.md` §5.
+
+V Claude Code se vyplatí omezit `--max-turns` (default je bez limitu) a případně `--max-budget-usd`, aby ti neutekly náklady při delší smyčce.
+
+---
+
+## 10. Uložení logu konverzace
+
+Po dokončení cross-checku ulož **celou výměnu** (všechny iterace) do log souboru v **rootu projektu**. Log musí zachytit tři části: **prompt**, který jsi poslal/a, **odpověď** externího modelu a tvé vlastní **vyhodnocení** (přijaté/odmítnuté nálezy, doporučení, nejistoty).
+
+```bash
+# Ulož přesný prompt a své vyhodnocení do souborů (aby je log obsahoval doslovně)
+cat > "$WORK/prompt.txt" << 'EOF'
+[přesný prompt/otázka poslaná externímu modelu]
+EOF
+
+cat > "$WORK/evaluation.txt" << 'EOF'
+[tvé vyhodnocení: přijaté nálezy, odmítnuté nálezy, doporučení, nejistoty]
+EOF
+
+# Log do rootu projektu
+TIMESTAMP=$(date '+%Y-%m-%d_%H.%M.%S')
+LOG="./.double-cross-check-talk_${TIMESTAMP}.log"
+
+{
+  echo "=== Double Cross-Check Log: $TIMESTAMP ==="
+  echo "Provider: [provider/model]"
+  echo ""
+  echo "--- Prompt ---"
+  cat "$WORK/prompt.txt"
+  echo ""
+  echo "--- Response ---"
+  cat "$WORK/answer.txt"
+  echo ""
+  echo "--- Evaluation ---"
+  cat "$WORK/evaluation.txt"
+} > "$LOG"
+
+echo "Log saved to: $LOG"
+
+# Logy jsou určené k verzování — pokud je projekt git repo, commitni log
+[ -d .git ] && git add "$LOG" && git commit -m "double-cross-check: log ${TIMESTAMP}"
+```
+
+Při více iteracích připoj do logu každé kolo (`--- Iteration N: Prompt / Response / Evaluation ---`).
+
+---
+
+## 11. Vyhodnocení a prezentace výsledků
+
+Výstup externího modelu ber jako **hypotézy, ne jako pravdu**. Druhý model může mít stejné slepé místo jako ty — "ověřeno cross-checkem" není totéž co "ověřeno proti realitě".
+
+### Postup vyhodnocení
+
+1. Přečti nálezy externího modelu bod po bodu.
+2. Každý konkrétní nález ověř proti dostupným souborům, testům, dokumentaci nebo primárnímu zdroji.
+3. Přijmi jen nálezy, které jsou konkrétní, relevantní a ověřené.
+4. Odmítni nálezy, které jsou spekulativní, neplatné nebo mimo rozsah.
+
+Nikdy nezapracovávej doporučení jen proto, že ho uvedl jiný model. Zapracuj ho **až po vlastním ověření**.
+
+### Struktura finální odpovědi uživateli
+
+Jasně odděl:
+
+- **Druhý názor** — který provider/model byl použit (např. *"OpenAI / Codex – gpt-5.6"* nebo *"Konsenzus: Codex + Gemini"*) a stručné shrnutí, co řekl.
+- **Přijaté nálezy** — co jsi po vlastním ověření přijal/a jako pravdivé. Pro každý: lokace + důkaz nebo zdůvodnění.
+- **Odmítnuté nálezy** — co jsi nepotvrdil/a a proč.
+- **Změny nebo doporučení** — co bylo provedeno nebo co má následovat.
+- **Nejistoty** — co vyžaduje další primární zdroj, test nebo rozhodnutí uživatele.
+
+### Doplňková pravidla
+
+- **Porovnej se svou původní analýzou.** Zdůrazni, kde ses lišil/a od externího modelu.
+- **Při více kontrolorech** vyjmenuj oblasti shody i neshody mezi nimi předtím, než přejdeš k vlastnímu vyhodnocení.
+- **Pokud spor mezi modely zůstává nerozhodnutý** i po vlastním ověření, nech ho v sekci *Nejistoty* otevřený a popiš, na čem rozhodnutí závisí — neforsírovej falešný konsenzus.
+
+=== FILE: second-opinion/SKILL.md ===
+---
+name: second-opinion
+description: "Získej druhý názor od modelů OpenAI (Codex), Google (Antigravity / agy) nebo Anthropic (Claude Code). Použij při validaci architektonických rozhodnutí, kontrole bezpečnosti kódu, porovnávání implementačních přístupů nebo když multi-model konsenzus přidá hodnotu. Podporuje všechny tři hlavní AI CLI nástroje pro maximální flexibilitu."
+
+allowed-tools:
+  - AskUserQuestion
+  - Read
+  - Glob
+  - Grep
+  - WebSearch
+  - WebFetch
+  - Bash(command -v *)
+  - Bash(codex --version:*)
+  - Bash(codex -a never exec:*)
+  - Bash(claude --version:*)
+  - Bash(claude -p:*)
+  - Bash(date:*)
+  - Bash(agy -p:*)
+  - Bash(agy --print:*)
+  - Bash(agy --prompt:*)
+  - Bash(agy models:*)
+  - Bash(mktemp:*)
+  - Bash(mkdir:*)
+  - Bash(cat:*)
+  - Bash(echo:*)
+  - Bash(git diff:*)
+  - Bash(git log:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+
+argument-hint: "question / file / decision to review"
+
+---
+
+# Second Opinion via Codex, Antigravity & Claude Code CLI
+
+Get an external AI perspective from OpenAI (via Codex CLI), Google (via Antigravity CLI — `agy`), or Anthropic (via Claude Code CLI) to validate decisions or compare approaches.
+
+**Shared reference files** (paths relative to this skill's directory):
+
+- `../references/cli-reference.md` — availability checks, authentication, mandatory flags, failure handling, full call patterns, CLI option tables, and model recommendations for all three providers. **Read it before making the first provider call.**
+- `../references/trusted-sources.md` — when AI cross-check isn't enough: independent sources and the trusted-media list.
+
+---
+
+## 1. Identify yourself
+
+Before starting, determine which model is running this skill (system prompt, CLI name, auth context). Choose verifiers from the **remaining** providers:
+
+- If you are **Claude** → use **Codex** and/or **agy** (with a Gemini model).
+- If you are **GPT/Codex** → use **Claude** and/or **agy** (with a Gemini model).
+- If you are **Gemini** → use **Codex** and/or **Claude**.
+
+Never verify with the same model family that produced the answer — it shares the same weaknesses. Note: `agy` also hosts Claude and GPT-OSS models; for cross-checking always call it with a `Gemini …` model (otherwise you lose provider independence).
+
+---
+
+## 2. Environment prerequisites
+
+Skill assumes a shell environment with the relevant CLI tools installed. **In a shell-less environment** (plain chat without bash tool), offer the user to send the verification prompt to another model manually, or use web search for fact grounding.
+
+Details live in `../references/cli-reference.md`. The non-negotiables:
+
+- Verify CLI availability before use (see reference §1 for the check snippet and authentication).
+- Run `codex`, `agy`, and `claude` **directly on the system, NOT in a sandbox** — they need login credentials unavailable there.
+- Every Codex call is `codex -a never exec --skip-git-repo-check ...`; on failure fall back to `codex:codex-rescue` (one retry), then switch provider.
+- Check exit codes on every provider call — an **empty output file means the call failed**, not that the model returned an empty answer. After one retry, switch provider and record the failure under *Uncertainties*.
+- Use `WORK=$(mktemp -d)` for intermediate outputs.
+
+---
+
+## 3. Quick Patterns
+
+Minimal one-shot examples. Full patterns (structured/schema output, images, workspace grounding, cheaper tiers) are in `../references/cli-reference.md` §3.
+
+```bash
+WORK=$(mktemp -d)
+
+# Codex (OpenAI)
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
+  --output-last-message "$WORK/codex.txt" \
+  "Your question here"
+cat "$WORK/codex.txt"
+
+# Antigravity / agy (Google) — always a Gemini model
+agy -p "Your question here" --model "Gemini 3.1 Pro (High)" > "$WORK/agy.txt"
+cat "$WORK/agy.txt"
+
+# Claude Code (Anthropic)
+claude -p "Your question here" --model opus --output-format text > "$WORK/claude.txt"
+cat "$WORK/claude.txt"
+```
+
+For schema-validated structured output use Codex `--output-schema` or Claude `--json-schema` (see reference §3); `agy` has no schema support — enforce JSON shape in the prompt.
+
+**Note:** The spawned instance runs independently without access to the current session context, providing a genuinely fresh perspective.
+
+---
+
+## 4. Use Cases
+
+Reusable prompt templates — combine with any provider pattern above.
+
+**Architecture review:**
+
+```text
+Review this architecture decision: [description].
+Assess: scalability, maintainability, security risks, alternatives.
+```
+
+**Security audit:**
+
+```text
+Security review of [file/code]:
+- Input validation
+- Authentication/authorization
+- Data exposure risks
+Provide specific vulnerabilities and fixes.
+```
+
+**Code review:**
+
+```text
+Review [file] for: bugs, performance issues, maintainability.
+Provide line-level recommendations.
+```
+
+---
+
+## 5. When AI cross-check isn't enough
+
+AI models share training data — and with it, shared hallucinations. When verifying a **fact** (existence of a person/account, date, value, quote, legal/historical claim), the strongest check is not another model but an **independent source**. See `../references/trusted-sources.md` for the source strategy and the trusted-media list.
+
+Use AI cross-check for **reasoning, structure, logical gaps, code review, design decisions**. For facts, use it only as a first filter and then verify against a source.
+
+---
+
+## 6. Evaluating findings
+
+Treat the external model's output as **hypotheses, not truth**. The second model may have the same blind spot as you — "verified by cross-check" is not the same as "verified against reality".
+
+### Evaluation process
+
+1. Read the external model's findings point by point.
+2. For each concrete finding, verify it independently against available files, tests, documentation, or a primary source.
+3. **Accept** findings that are concrete, relevant, and confirmed by your own verification.
+4. **Reject** findings that are speculative, invalid, or out of scope. Never apply a recommendation just because another model stated it — apply it only after your own verification.
+
+### Structure of final answer
+
+Clearly separate:
+
+- **Second opinion** — which provider/model was used and a brief summary of what it said.
+- **Accepted findings** — what you confirmed as valid after your own verification. For each: location + evidence or reasoning.
+- **Rejected findings** — what you did not confirm and why.
+- **Changes or recommendations** — what was done or what should follow.
+- **Uncertainties** — what requires a primary source, a test, or a decision from the user.
+
+---
+
+## 7. Saving the conversation log
+
+After completing the cross-check, save the **full exchange** to a log file in the **project root** (not `.claude/`). The log must capture all three parts: the **prompt** you sent, the external model's **response**, and your own **evaluation** (accepted/rejected findings, recommendations, uncertainties).
+
+Write the prompt and your evaluation to files first (so the log contains them verbatim), then assemble the log:
+
+```bash
+# Store the exact prompt you sent and your evaluation as files
+cat > "$WORK/prompt.txt" << 'EOF'
+[the exact prompt/question sent to the external model]
+EOF
+
+cat > "$WORK/evaluation.txt" << 'EOF'
+[your evaluation: accepted findings, rejected findings, recommendations, uncertainties]
+EOF
+
+# Log into the project root
+TIMESTAMP=$(date '+%Y-%m-%d_%H.%M.%S')
+LOG="./.second-opinion-talk_${TIMESTAMP}.log"
+
+{
+  echo "=== Second Opinion Log: $TIMESTAMP ==="
+  echo "Provider: [provider/model]"
+  echo ""
+  echo "--- Prompt ---"
+  cat "$WORK/prompt.txt"
+  echo ""
+  echo "--- Response ---"
+  cat "$WORK/answer.txt"
+  echo ""
+  echo "--- Evaluation ---"
+  cat "$WORK/evaluation.txt"
+} > "$LOG"
+
+echo "Log saved to: $LOG"
+
+# The logs are meant to be versioned — commit the log if the project is a git repo
+[ -d .git ] && git add "$LOG" && git commit -m "second-opinion: log ${TIMESTAMP}"
+```
+
+---
+
+## 8. Multi-Provider Consensus Example
+
+Get second opinions from all three providers and compare:
+
+```bash
+WORK=$(mktemp -d)
+
+# 1. Ask Codex
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
+  --output-last-message "$WORK/codex_opinion.txt" \
+  "Should we use Redis or PostgreSQL for session storage in e-commerce app?"
+
+# 2. Ask Antigravity (agy)
+agy -p "Should we use Redis or PostgreSQL for session storage in e-commerce app?" \
+  --model "Gemini 3.1 Pro (High)" > "$WORK/agy_opinion.txt"
+
+# 3. Ask Claude Code
+claude -p "Should we use Redis or PostgreSQL for session storage in e-commerce app?" \
+  --model opus --output-format text > "$WORK/claude_opinion.txt"
+
+# 4. Compare outputs
+echo "=== Codex (OpenAI) ===" && cat "$WORK/codex_opinion.txt"
+echo ""
+echo "=== Antigravity / agy (Google) ===" && cat "$WORK/agy_opinion.txt"
+echo ""
+echo "=== Claude Code (Anthropic) ===" && cat "$WORK/claude_opinion.txt"
+
+# 5. Save log (prompt + all responses + your evaluation) into the project root
+cat > "$WORK/prompt.txt" << 'EOF'
+Should we use Redis or PostgreSQL for session storage in e-commerce app?
+EOF
+cat > "$WORK/evaluation.txt" << 'EOF'
+[your evaluation: accepted findings, rejected findings, recommendations, uncertainties]
+EOF
+
+TIMESTAMP=$(date '+%Y-%m-%d_%H.%M.%S')
+LOG="./.second-opinion-talk_${TIMESTAMP}.log"
+{
+  echo "=== Second Opinion Log: $TIMESTAMP ==="
+  echo "--- Prompt ---"; cat "$WORK/prompt.txt"
+  echo "--- Codex ---"; cat "$WORK/codex_opinion.txt"
+  echo "--- agy ---"; cat "$WORK/agy_opinion.txt"
+  echo "--- Claude ---"; cat "$WORK/claude_opinion.txt"
+  echo "--- Evaluation ---"; cat "$WORK/evaluation.txt"
+} > "$LOG"
+[ -d .git ] && git add "$LOG" && git commit -m "second-opinion: log ${TIMESTAMP}"
+```
+
+Analyze agreement/disagreement across all three providers and synthesize a final recommendation.
+
+=== FILE: references/cli-reference.md ===
+# Referenční příručka: volání AI CLI providerů
+
+Sdílená reference pro skilly `second-opinion` a `double-cross-check`. Ze skillu ji načteš relativní cestou `../references/cli-reference.md`. Drží se tu vše, co se týká volání tří CLI nástrojů — vzory, flagy, tabulky voleb a doporučené modely — aby se změny (např. nová verze modelu) dělaly na jednom místě.
+
+Provideři:
+
+- **Codex CLI** (OpenAI) — `codex`
+- **Antigravity CLI** (Google) — `agy`; hostí Gemini, Claude i GPT-OSS modely, pro cross-check volej výhradně s `Gemini …` modelem
+- **Claude Code CLI** (Anthropic) — `claude`
+
+---
+
+## 1. Dostupnost a autentizace
+
+```bash
+codex --version  || echo "Codex CLI není nainstalované"
+command -v agy >/dev/null && agy models >/dev/null 2>&1 \
+  && echo "Antigravity (agy) OK" \
+  || echo "Antigravity CLI (agy) není nainstalované nebo není nakonfigurované"
+claude --version || echo "Claude Code CLI není nainstalované"
+```
+
+- **Codex:** `codex login` nebo env var `OPENAI_API_KEY`
+- **Antigravity (agy):** první nastavení `agy install` (PATH + shell aliases), přihlášení dle <https://antigravity.google/docs/cli-reference>
+- **Claude Code:** `claude auth login` nebo env var `ANTHROPIC_API_KEY`
+
+**Workdir:** všechny vzory používají `WORK=$(mktemp -d)` a pak `$WORK/...` pro mezivýstupy — žádné kolize při paralelním běhu.
+
+**DŮLEŽITÉ:** `codex`, `agy` a `claude` spouštěj přímo v systému, **NE v sandboxu** — v sandboxu chybí login credentials a volání selžou.
+
+---
+
+## 2. Povinné flagy a ošetření selhání
+
+**Codex — povinná kombinace `-a never exec --skip-git-repo-check`:** každé volání Codexu z těchto skillů má tvar `codex -a never exec --skip-git-repo-check ...`. Codex defaultně odmítne běžet mimo git repo; skilly přes něj nic nezapisují, takže check je zbytečný. Bez flagu volání selže s chybou *"not inside a Git repository"*.
+
+**Fallback při selhání Codexu:** pokud `codex exec` selže i s flagy (timeout, autentizace, runtime error), deleguj na `codex:codex-rescue` skill / subagent. Jen jeden retry; pokud selže i ten, přepni na jiného providera a poznač selhání do sekce *Nejistoty* finální odpovědi.
+
+**Kontrola selhání u všech providerů:** `agy` a `claude` při chybě typicky zapíšou prázdný výstupní soubor. Po každém volání ověř exit kód — prázdný soubor znamená **selhání volání, ne prázdnou odpověď externího modelu**:
+
+```bash
+agy -p "…" --model "Gemini 3.1 Pro (High)" > "$WORK/answer.txt" \
+  || { echo "agy call failed"; }
+[ -s "$WORK/answer.txt" ] || echo "WARNING: empty answer — treat as provider failure"
+```
+
+Po jednom retry přepni na jiného providera a selhání poznač do *Nejistot*. Nikdy nevyhodnocuj prázdný soubor jako platnou odpověď.
+
+---
+
+## 3. Volací vzory
+
+### Codex (OpenAI)
+
+```bash
+WORK=$(mktemp -d)
+
+# Jednoduchá otázka
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
+  --output-last-message "$WORK/answer.txt" \
+  "Tvá otázka tady"
+cat "$WORK/answer.txt"
+
+# Strukturovaný výstup s validací JSON Schema
+cat > "$WORK/schema.json" <<'EOF'
+{
+  "type": "object",
+  "properties": {
+    "assessment":     { "type": "string" },
+    "strengths":      { "type": "array", "items": { "type": "string" } },
+    "concerns":       { "type": "array", "items": { "type": "string" } },
+    "recommendation": { "type": "string" }
+  },
+  "required": ["assessment", "strengths", "concerns", "recommendation"],
+  "additionalProperties": false
+}
+EOF
+
+codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
+  --output-schema "$WORK/schema.json" \
+  --output-last-message "$WORK/result.json" \
+  "Analyzuj [téma]. Vrať strukturované zhodnocení."
+cat "$WORK/result.json"
+```
+
+**Pozn. ke schématu:** všechny objekty (i vnořené) musí mít `"additionalProperties": false` a `"required": [...]` se všemi vlastnostmi. Jinak Codex volání odmítne.
+
+### Antigravity / agy (Google)
+
+```bash
+WORK=$(mktemp -d)
+
+# Jednoduchá otázka s Gemini 3.1 Pro
+agy -p "Tvá otázka tady" --model "Gemini 3.1 Pro (High)" > "$WORK/answer.txt"
+cat "$WORK/answer.txt"
+
+# Rychlejší / levnější Flash
+agy -p "Tvá otázka tady" --model "Gemini 3.5 Flash (High)" > "$WORK/answer.txt"
+
+# JSON výstup (bez schema validace — tvar vynucuj v promptu)
+agy -p "Analyzuj [téma]. Odpověz JSONem s klíči assessment (string), strengths (array), concerns (array), recommendation (string). Vrať POUZE JSON objekt, žádný okolní text." \
+  --model "Gemini 3.1 Pro (High)" > "$WORK/result.json"
+cat "$WORK/result.json"
+
+# Volitelně: workspace pro grounding nad konkrétními soubory
+agy -p "Reviewuj architekturu projektu." \
+  --add-dir "$PWD/src" \
+  --model "Gemini 3.1 Pro (High)" > "$WORK/answer.txt"
+```
+
+**Pozn.:** `agy` nemá `--output-format` flag — výstup je vždy raw text na stdout. JSON tvar vynucuj v promptu; pro validaci proti schématu použij Codex (`--output-schema`) nebo Claude (`--json-schema`). Názvy modelů obsahují mezery a závorky — vždy dvojité uvozovky. Aktuální seznam modelů: `agy models`.
+
+### Claude Code (Anthropic)
+
+```bash
+WORK=$(mktemp -d)
+
+# Jednoduchá otázka (alias 'opus' = nejlepší dostupný Opus)
+claude -p "Tvá otázka tady" --model opus --output-format text > "$WORK/answer.txt"
+cat "$WORK/answer.txt"
+
+# Konkrétní pin verze (reprodukovatelnost)
+claude -p "Tvá otázka tady" --model claude-opus-4-7 \
+  --effort xhigh --output-format text > "$WORK/answer.txt"
+
+# Levnější / rychlejší pro jednoduché úlohy
+claude -p "Tvá otázka tady" --model haiku --output-format text > "$WORK/answer.txt"
+
+# Strukturovaný výstup s validací JSON Schema
+claude -p "Analyzuj [téma]. Vrať strukturované zhodnocení." \
+  --model opus --json-schema "$WORK/schema.json" > "$WORK/result.json"
+cat "$WORK/result.json"
+```
+
+**Pozn.:** `claude -p` (`--print`) spustí nezávislou instanci bez kontextu aktuální session — ověřovatel dostává opravdu čerstvý pohled. Totéž platí pro `codex exec` a `agy -p`.
+
+---
+
+## 4. Tabulky voleb CLI
+
+### Codex CLI
+
+| Volba | Účel |
+|---|---|
+| `-m gpt-5.6` | Alias na `gpt-5.6-sol` — frontier model (doporučeno pro hloubkovou kontrolu) |
+| `-m gpt-5.6-sol` | Flagship pro komplexní úlohy a agentické kódování |
+| `-m gpt-5.6-terra` | Vyvážený „everyday" model (intelligence vs. cena) |
+| `-m gpt-5.6-luna` | Rychlý a levný pro jednoduché a vysokoobjemové úlohy |
+| `-c 'model_reasoning_effort="high"'` | Reasoning effort. Hodnoty: `low`, `medium`, `high`, `xhigh` |
+| `--output-schema file.json` | Strukturovaný JSON s validací schématu |
+| `--output-last-message file.txt` | Uložení odpovědi do souboru |
+| `-i image.png` | Přidání obrázku k analýze |
+
+### Antigravity (agy) CLI
+
+| Volba | Účel |
+|---|---|
+| `--model "Gemini 3.1 Pro (High)"` | Nejlepší Gemini reasoning (uvozovky kvůli mezerám) |
+| `--model "Gemini 3.1 Pro (Low)"` | Rychlejší Gemini Pro |
+| `--model "Gemini 3.5 Flash (High)"` | Rychlejší a levnější Gemini Flash |
+| `--model "Gemini 3.5 Flash (Medium\|Low)"` | Další varianty Flash modelu |
+| `--model "Claude Opus 4.6 (Thinking)"` | Anthropic přes agy (pro cross-check **nepoužívej** — ztrácíš nezávislost providera) |
+| `--model "GPT-OSS 120B (Medium)"` | Open-source GPT-OSS model |
+| `-p "prompt"` / `--print` / `--prompt` | Neinteraktivní print mode (povinné pro skripty) |
+| `--print-timeout 5m` | Timeout pro print mode (default 5m) |
+| `--add-dir <path>` | Přidá adresář do workspace (repeatable) — grounding nad reálnými soubory |
+| `--dangerously-skip-permissions` | Auto-approve tool permission promptů (jen pro neinteraktivní skripty) |
+| `agy models` | Vypíše seznam dostupných modelů |
+| `agy install` | První nastavení (PATH, shell aliases) |
+
+### Claude Code CLI
+
+| Volba | Účel |
+|---|---|
+| `--model opus` | Alias na nejlepší dostupný Opus |
+| `--model claude-opus-4-7` | Pin konkrétní verze (reprodukovatelnost) |
+| `--model sonnet` / `claude-sonnet-4-6` | Vyvážená rychlost a kvalita |
+| `--model haiku` / `claude-haiku-4-5-20251001` | Rychlý a levný |
+| `--effort xhigh` | Hluboké uvažování. Hodnoty: `low`, `medium`, `high`, `xhigh`, `max` |
+| `-p "prompt"` | Neinteraktivní print mode (povinné pro skripty) |
+| `--output-format text` / `json` | Formát výstupu (`json` = strukturovaný message objekt) |
+| `--json-schema file.json` | Strukturovaný JSON s validací schématu |
+| `--max-turns N` | Strop agentních kol (default: bez limitu) |
+| `--max-budget-usd N` | Strop útraty na session |
+| `--permission-mode bypassPermissions` | Pro CI / non-interactive bez schvalování — jen se souhlasem uživatele |
+
+---
+
+## 5. Doporučení modelu podle úlohy
+
+| Úloha | Codex (OpenAI) | Antigravity / agy (Google) | Claude Code (Anthropic) |
+|---|---|---|---|
+| Komplexní rešerše / architektura | `gpt-5.6` + high/xhigh | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-7` + xhigh |
+| Rychlé code review | `gpt-5.6-luna` | `"Gemini 3.5 Flash (High)"` | `haiku` |
+| Bezpečnostní audit (hluboký) | `gpt-5.6` + xhigh | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-7` + xhigh |
+| Strukturovaný výstup s validací | `gpt-5.6` + `--output-schema` | — (bez schema validace) | `claude-opus-4-7` + `--json-schema` |
+| Faktografická verifikace | `gpt-5.6` (kombinuj se zdroji) | `"Gemini 3.1 Pro (High)"` | `claude-opus-4-7` |
+| Multi-model konsenzus | spusť všechny tři a porovnej | spusť všechny tři a porovnej | spusť všechny tři a porovnej |
+
+Aliasy (`opus`, `sonnet`, `haiku`, `gpt-5.6`) ukazují na aktuálně doporučenou verzi providera; pro reprodukovatelnost pinuj konkrétní verzi modelu.
+
+=== FILE: references/trusted-sources.md ===
+# Kdy AI cross-check nestačí: nezávislé zdroje
+
+Sdílená reference pro skilly `second-opinion` a `double-cross-check` (`../references/trusted-sources.md`).
+
+AI modely sdílejí trénovací data — a s nimi i halucinace. Když ověřuješ **fakt** (existence osoby/účtu, datum, hodnota, citát, právní/historický nárok), nejsilnější kontrola není další model, ale **nezávislý zdroj**:
+
+- Pro veřejné instituce a osoby: oficiální registry, Wikidata, parlamentní/justiční databáze, MCP server hlidac-statu (Hlídač státu), důvěryhodná média.
+- Pro novější fakta: web search s důrazem na primární zdroje, důvěryhodná média.
+- Pro kód a knihovny: oficiální dokumentace, repo, changelog.
+
+## Důvěryhodná média
+
+- **Česká:** ceskenoviny.cz, iDnes.cz, DenikN.cz, SeznamZpravy.cz, Denik.cz, iHned.cz, cc.cz, cnn.iprima.cz, ct24.ceskatelevize.cz, irozhlas.cz, lupa.cz, novinky.cz
+- **Zahraniční:** reuters.com, apnews.com, bbc.com, theguardian.com, nytimes.com, washingtonpost.com, wsj.com, ft.com, economist.com, npr.org, pbs.org, propublica.org, bloomberg.com, theatlantic.com, icij.org, occrp.org
+
+I obsah na důvěryhodných médiích se pokus ověřit proti primárnímu zdroji.
+
+## Pravidlo
+
+Použij AI cross-check pro **uvažování, strukturu, logické skoky, code review, návrhová rozhodnutí**. Pro fakta ho použij jen jako první filtr a pak ověř proti zdroji.
+
+--- Response: CODEX ---
+Celkově bych plugin v této podobě nepouštěl do běžného používání. Názvy modelů `agy` jsem ověřil proti lokálnímu `agy models` a jsou platné; tam problém není. Kritické chyby jsou hlavně v izolaci agentů, logování, error handlingu a nefunkčním Claude JSON Schema příkladu.
+
+## Nálezy
+
+1. **Blocker — externí agenti mohou měnit kontrolovaný projekt**
+
+   - Místo: [double-cross-check/SKILL.md:65](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:65), [second-opinion/SKILL.md:65](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:65), [cli-reference.md:29](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:29), [cli-reference.md:35](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:35).
+   - Důvod: „spouštěj přímo v systému, NE v sandboxu“ je zaměnění dvou vrstev izolace. CLI může být spuštěno hostitelským procesem a přitom jeho agent musí mít vlastní read-only sandbox. `codex -a never` vypíná schvalování, nikoli zápis; bez explicitního `-s read-only` závisí chování na konfiguraci. `agy` standardně dovoluje čtení i zápis ve workspace a Claude má standardně agentní nástroje. Kontrolovaný text navíc může obsahovat prompt injection.
+   - Oprava: vynutit bezpečný profil pro každý provider:
+     - Codex: `-s read-only --ephemeral`, případně izolovaný `-C`.
+     - Claude: `--tools "" --no-session-persistence --safe-mode` pro čistě textovou kontrolu, případně explicitní read-only seznam nástrojů.
+     - agy: `--sandbox` a striktní permission profil.
+     - Volání mimo hostitelský sandbox eskalovat jen při prokázaném problému s autentizací.
+   - Oficiální dokumentace `agy` potvrzuje, že workspace je standardně zapisovatelný a sandbox je opt-in: [Permissions](https://antigravity.google/docs/cli-permissions), [Sandbox](https://antigravity.google/docs/cli-sandbox).
+
+2. **Blocker — automatický commit může zveřejnit citlivá data a commitnout cizí staged změny**
+
+   - Místo: [double-cross-check/SKILL.md:262](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:262), [double-cross-check/SKILL.md:294](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:294), [second-opinion/SKILL.md:163](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:163), [second-opinion/SKILL.md:197](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:197).
+   - Důvod: log má obsahovat celý prompt, zdrojový kód, odpověď a vyhodnocení. To může obsahovat tajemství, osobní údaje nebo neveřejný materiál. `git commit` navíc commitne i všechny změny, které už měl uživatel ve staging area, nejen nový log.
+   - Oprava: logování a zejména commit musí být explicitní opt-in. Před uložením provést redakci tajemství. Výchozí log ukládat mimo repo nebo do ignorovaného adresáře. Pokud uživatel commit výslovně chce, použít izolovaný commit konkrétní cesty a nejdřív zkontrolovat staged stav.
+
+3. **Major — obecný log čte soubor, který provider vůbec nevytvořil**
+
+   - Místo: [double-cross-check/SKILL.md:131](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:131)–143 versus [double-cross-check/SKILL.md:285](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:285); [second-opinion/SKILL.md:79](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:79)–91 versus [second-opinion/SKILL.md:188](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:188).
+   - Důvod: rychlé vzory zapisují `codex.txt`, `agy.txt` nebo `claude.txt`; log vždy čte `$WORK/answer.txt`. Výsledkem je chyba `No such file` a neúplný log.
+   - Oprava: standardizovat všechny providery na jednu proměnnou, například `ANSWER_FILE="$WORK/answer.txt"`, nebo před logováním sestavit explicitní seznam providerových výstupů.
+
+4. **Major — deklarovaný error handling není implementován v žádném hlavním příkladu**
+
+   - Místo: požadavek v [double-cross-check/SKILL.md:67](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:67), [second-opinion/SKILL.md:67](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:67) a [cli-reference.md:39](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:39); příklady například [second-opinion/SKILL.md:210](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:210)–228.
+   - Důvod: příklady nekontrolují exit status ani neprázdnost výstupu, nedělají retry a nepřepínají providera. Multi-provider příklad po selhání pokračuje a následně porovnává či loguje chybějící soubory.
+   - Oprava: vytvořit jeden sdílený wrapper `run_provider`, který zachytí stdout/stderr, kontroluje exit code i `-s`, provede právě jeden retry a vrací jednoznačný stav.
+
+5. **Major — jediný ukázaný error handler chybu fakticky zamaskuje**
+
+   - Místo: [cli-reference.md:41](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:41)–45.
+   - Důvod: konstrukce `command || { echo "failed"; }` skončí po úspěšném `echo` se statusem 0. Následující `test || echo` také skončí úspěšně. Volající tedy nemá jak poznat selhání.
+   - Oprava: po diagnostice vrátit nenulový stav nebo přímo větvit:
+
+     ```bash
+     if ! agy ... >"$ANSWER_FILE" 2>"$ERROR_FILE" || [ ! -s "$ANSWER_FILE" ]; then
+       return 1
+     fi
+     ```
+
+6. **Major — Claude `--json-schema` příklad používá chybný typ argumentu**
+
+   - Místo: [cli-reference.md:129](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:129)–132 a [cli-reference.md:182](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:182).
+   - Důvod: Claude Code 2.1.207 očekává za `--json-schema` JSON Schema jako JSON řetězec, nikoli cestu k souboru. Navíc v Claude sekci vznikne nový `$WORK`, ale `schema.json` se v něm vůbec nevytvoří.
+   - Oprava:
+
+     ```bash
+     SCHEMA=$(<"$WORK/schema.json")
+     claude -p "..." --model opus --json-schema "$SCHEMA"
+     ```
+
+     Formát argumentu potvrzuje i lokální `claude --help`; oficiální přehled voleb je v [Claude Code CLI reference](https://docs.anthropic.com/en/docs/claude-code/cli-usage).
+
+7. **Major — fallback `codex:codex-rescue` v pluginu neexistuje**
+
+   - Místo: [double-cross-check/SKILL.md:66](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:66), [second-opinion/SKILL.md:66](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:66), [cli-reference.md:37](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:37).
+   - Důvod: v repozitáři není skill ani subagent tohoto jména. Není popsáno, odkud se bere, jak se volá ani jak dostane původní prompt. Failure path je tedy neproveditelný.
+   - Oprava: buď rescue skill skutečně dodat jako závislost, nebo instrukci odstranit a provést jeden normální retry s diagnostikou, poté přepnout providera.
+
+8. **Major — multi-provider workflow porušuje vlastní zákaz self-review**
+
+   - Místo: pravidlo v [second-opinion/SKILL.md:48](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:48)–54 versus „all three“ v [second-opinion/SKILL.md:203](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:203)–221; obdobně [double-cross-check/SKILL.md:252](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:252)–253.
+   - Důvod: když skill běží například v Claude, příklad „všechny tři“ zavolá i Claude. To je přímo zakázáno v sekci identifikace.
+   - Oprava: dynamicky sestavit seznam pouze z ostatních rodin. „Všechny tři“ změnit na „všechny dostupné nezávislé rodiny kromě autora“.
+
+9. **Major — identifikuje se runner, nikoli autor kontrolovaného výstupu**
+
+   - Místo: [double-cross-check/SKILL.md:48](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:48) versus [double-cross-check/SKILL.md:54](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:54); stejné v [second-opinion/SKILL.md:48](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:48).
+   - Důvod: model spouštějící skill nemusí být model, který vytvořil kontrolovaný text. GPT runner může kontrolovat odpověď vytvořenou Claudem; současná logika vyloučí GPT a naopak dovolí Claude.
+   - Oprava: určit původ kontrolovaného artefaktu. Pokud není známý, přiznat to a použít dvě různé rodiny místo odvozování z runtime.
+
+10. **Major — `allowed-tools` neodpovídají předepsanému workflow**
+
+   - Místo: seznamy [double-cross-check/SKILL.md:5](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:5)–29 a [second-opinion/SKILL.md:5](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:5)–29; použití `[ -d .git ]` například [second-opinion/SKILL.md:198](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:198).
+   - Důvod: není povolen shellový příkaz `test`/`[`, žádný nástroj pro timeout, `git rev-parse` pro nalezení rootu ani mechanismus pro neexistující rescue skill. Široké vzory `Bash(claude -p:*)` a `Bash(agy -p:*)` naopak dovolují přidat za povolený prefix nebezpečné flagy.
+   - Oprava: nejdřív vytvořit jediný skutečně spustitelný wrapper a podle něj odvodit minimální allowlist. Nebezpečné volby explicitně zakázat.
+
+11. **Major — log se neukládá spolehlivě do rootu projektu**
+
+   - Místo: [double-cross-check/SKILL.md:274](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:274)–276, [second-opinion/SKILL.md:177](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:177)–179.
+   - Důvod: `./...log` znamená aktuální adresář, ne root projektu. `[ -d .git ]` navíc selže v podadresáři a ve worktree, kde `.git` může být soubor.
+   - Oprava: root určit přes `git rev-parse --show-toplevel`; mimo Git explicitně použít předem zjištěný workspace root nebo log neukládat bez potvrzení.
+
+12. **Major — chybějí pevné časové a nákladové limity**
+
+   - Místo: doporučení pouze v [double-cross-check/SKILL.md:256](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:256); tabulky [cli-reference.md:165](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:165), [cli-reference.md:183](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:183)–184.
+   - Důvod: žádný příklad nepoužívá `--max-turns`, `--max-budget-usd` ani vnější timeout pro Codex/Claude. Selhávající nebo agentní kontrola může běžet dlouho a spotřebovat neočekávaný rozpočet.
+   - Oprava: limity učinit součástí canonical wrapperu a konfigurovat je. Bez explicitní konfigurace fail-fast nebo se uživatele zeptat; nevymýšlet skryté defaulty.
+
+13. **Minor — kontrola dostupnosti nekontroluje autentizaci a neřídí další tok**
+
+   - Místo: [cli-reference.md:15](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:15)–25.
+   - Důvod: `codex --version` a `claude --version` pouze dokazují existenci binárky. `|| echo` nenastaví stav providera a workflow může následně zavolat neautentizovaný CLI.
+   - Oprava: oddělit `installed`, `authenticated`, `model_available`. Výsledky uložit do stavových proměnných a provider selection skutečně o ně opřít.
+
+14. **Major — tvrzení o „čerstvé instanci bez kontextu“ je příliš silné**
+
+   - Místo: [double-cross-check/SKILL.md:148](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:148), [second-opinion/SKILL.md:96](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:96), [cli-reference.md:135](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:135).
+   - Důvod: instance nemá historii aktuálního chatu, ale může načíst projektové instrukce, globální konfiguraci, pluginy, MCP servery, pravidla a workspace. To není čistý ani plně nezávislý kontext.
+   - Oprava: formulovat přesněji a pro izolovanou kontrolu vypnout session persistence a customizace; pracovní adresář nastavit na izolovaný dočasný adresář.
+
+15. **Major — tvrzení „model nemá přístup k živým zdrojům“ odporuje způsobu spuštění**
+
+   - Místo: faktografický příklad [double-cross-check/SKILL.md:159](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:159)–170.
+   - Důvod: `claude -p` je spuštěn s výchozí sadou agentních nástrojů; podle konfigurace může mít webové a další nástroje. Nelze současně tvrdit, že živé zdroje určitě nemá.
+   - Oprava: buď nástroje explicitně vypnout a tvrzení ponechat, nebo přístup ke zdrojům zjistit a u každého důkazu požadovat URL/citaci.
+
+16. **Minor — dočasné soubory s citlivým obsahem se nečistí a nemají stanovená oprávnění**
+
+   - Místo: opakované `WORK=$(mktemp -d)`, například [double-cross-check/SKILL.md:129](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:129).
+   - Důvod: prompt, zdrojový kód, odpovědi a hodnocení zůstávají v `/tmp`. Selhání `mktemp` se nekontroluje.
+   - Oprava: `umask 077`, ověřit neprázdné `$WORK`, přidat bezpečný cleanup trap. Pokud se má log zachovat, zkopírovat až redigovanou finální verzi.
+
+17. **Minor — názvy logů kolidují při souběhu**
+
+   - Místo: [double-cross-check/SKILL.md:275](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:275)–276, [second-opinion/SKILL.md:178](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:178)–179.
+   - Důvod: přesnost na sekundy nestačí při dvou paralelních spuštěních. Druhý proces může log přepsat; paralelní `git commit` pak může selhat nebo commitnout neočekávaný stav.
+   - Oprava: vytvořit log atomicky přes `mktemp` v cílovém adresáři nebo přidat bezpečný unikátní identifikátor a no-clobber režim.
+
+18. **Minor — vkládání celých souborů přes command substitution je křehké**
+
+   - Místo: [double-cross-check/SKILL.md:162](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:162), [double-cross-check/SKILL.md:188](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:188), [double-cross-check/SKILL.md:212](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:212), [double-cross-check/SKILL.md:228](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:228).
+   - Důvod: velký soubor může překročit limit velikosti argumentů; command substitution odstraní koncové newline. Selhání `cat` či `git diff` se vloží jako prázdný obsah a provider přesto běží.
+   - Oprava: prompt a data skládat do souboru a předávat přes stdin. Předem kontrolovat existenci, velikost a exit status zdrojového příkazu.
+
+19. **Minor — dva skilly se funkčně překrývají a sdílená reference není skutečným single source of truth**
+
+   - Místo: rychlé vzory [double-cross-check/SKILL.md:124](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/double-cross-check/SKILL.md:124), [second-opinion/SKILL.md:72](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/second-opinion/SKILL.md:72) a znovu [cli-reference.md:51](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/cli-reference.md:51).
+   - Důvod: modely, flagy, bezpečnostní pravidla, hodnocení i logovací postup jsou duplikované. `second-opinion` nabízí multi-provider konsenzus a `double-cross-check` připouští jediného kontrolora, takže hranice mezi skilly je nejasná.
+   - Oprava: v `cli-reference.md` držet jediný executable wrapper a model registry. `second-opinion` definovat jako jednorázový jeden nezávislý názor; `double-cross-check` jako iterativní re-check nebo multi-provider workflow. Skill soubory mají odkazovat, ne kopírovat příkazy.
+
+20. **Minor — `trusted-sources.md` zaměňuje důvěryhodnost domény za kvalitu konkrétního důkazu**
+
+   - Místo: [trusted-sources.md:7](/Users/michalblaha/Documents/Dev/Dev%20Projects/michalblaha-ai-plugins/plugins/ai-review/skills/references/trusted-sources.md:7)–16.
+   - Důvod: Wikidata je editovatelný sekundární agregátor a mediální doména může obsahovat zprávy agentury, komentáře, blogy i převzatý obsah. Prostý allowlist domén nestačí pro faktografické ověření.
+   - Oprava: zavést pořadí důkazů: primární dokument → oficiální databáze → více nezávislých seriózních sekundárních zdrojů → agregátor pouze jako vodítko. U každého tvrzení evidovat konkrétní URL, datum a typ zdroje.
+
+## Doporučené pořadí oprav
+
+Nejdřív bych zastavil automatické commity a uzamkl všechny tři externí CLI do read-only režimu. Potom bych vytvořil jediný testovatelný shell wrapper pro provider call, který řeší timeout, stderr, neprázdný výstup, retry a jednotný `answer.txt`. Teprve následně opravil Claude schema a zredukoval duplicity mezi oběma skilly.
+
+Modelové názvy `Gemini 3.1 Pro (High)` a `Gemini 3.5 Flash (...)` nejsou nález: lokální `agy 1.1.1` je skutečně nabízí. U Codex/Claude pinů bych pouze přidal runtime kontrolu dostupnosti; bez neúspěšného volání nemám podklad tvrdit, že jsou chybné.
+--- Response: GEMINI (agy) ---
+Zde je kritické posouzení zadané sady skill-promptů. Text je napsaný kvalitně a koncepce dává smysl, nicméně obsahuje několik vážných logických a exekučních mezer, které v praxi agentovi rozbijí běh (zejména práce se soubory a Gitem).
+
+### 1. Nekompletní a nefunkční Bash skript při ukládání logu (Chybějící výstup)
+- **Závažnost:** Blocker
+- **Soubor a místo:** `double-cross-check/SKILL.md` (Sekce 10) a `second-opinion/SKILL.md` (Sekce 7)
+- **Důvod:** Ve snippetu pro vytvoření logu se volá `cat "$WORK/answer.txt"`. Nicméně předchozí "Rychlé vzory volání" (Sekce 6 a Sekce 3) ukládají odpovědi LLM do specifických souborů podle providera (tj. `$WORK/codex.txt`, `$WORK/agy.txt` nebo `$WORK/claude.txt`). Soubor `answer.txt` se v konkrétním běhu agenta z předchozích příkladů nikdy nevytvoří. Příkaz `cat` proto selže s chybou `No such file or directory`, skript spadne a log se nevygeneruje.
+- **Doporučená oprava:** Instrukci v logovací sekci upravit tak, aby agent explicitně dosadil správnou cestu. Buď zavést do instrukcí, ať všichni provideři zapisují do jednotného `$WORK/answer.txt`, nebo upravit generátor logu na použití zástupné proměnné s komentářem: `cat "$RESPONSE_FILE" # Nahraď skutečným názvem souboru z předchozího kroku (např. $WORK/agy.txt)`.
+
+### 2. Bezpečnostní a provozní riziko při auto-commitování logů
+- **Závažnost:** Major
+- **Soubor a místo:** `double-cross-check/SKILL.md` (Sekce 10) a `second-opinion/SKILL.md` (Sekce 7 a 8)
+- **Důvod:** Na konci skriptů je příkaz `[ -d .git ] && git add "$LOG" && git commit -m "..."`. Umožnit autonomnímu agentovi, aby svévolně a potichu commitoval dlouhé generované AI logy přímo do lokálního repozitáře uživatele, je velké bezpečnostní a provozní riziko. Špiní to historii Gitu balastem a může dojít k nechtěnému nasdílení citlivých dat (prompty, chráněný zdrojový kód).
+- **Doporučená oprava:** Zcela odstranit operace `git add` a `git commit` ze skriptů. Logy by měly pouze zůstat vytvořené v adresáři projektu. Agent by měl uživateli pouze sdělit: `"Log byl uložen do $LOG. Pokud jej chceš verzovat, přidej si ho do gitu."` Zároveň v hlavičkách obou souborů smazat zbytečné flagy `Bash(git add:*)` a `Bash(git commit:*)`.
+
+### 3. Ztráta chybových zpráv při selhání CLI providera (Chybějící STDERR)
+- **Závažnost:** Major
+- **Soubor a místo:** Všechny soubory s bash vzory volání (zejména `references/cli-reference.md` Sekce 2 a 3)
+- **Důvod:** Vzory volání používají k uložení výstupu standardní přesměrování: `agy -p "..." > "$WORK/agy.txt"`. Pokud vzdálené API selže (rate limit, vypršení tokenu, timeout) a CLI nástroj vypíše důvod selhání na standardní chybový výstup (stderr), do výstupního textového souboru se chyba neuloží. Soubor zůstane prázdný. Agent podle instrukce (`[ -s "$WORK/..." ] || echo "WARNING: empty answer"`) sice správně pozná, že volání selhalo, ale ztratí kontext PROČ se tak stalo a nedokáže uživateli reportovat reálnou příčinu.
+- **Doporučená oprava:** Přesměrovat i chybový výstup pomocí `2>&1` u všech hlavních volání (např. `> "$WORK/agy.txt" 2>&1`), nebo jej oddělit do `2> "$WORK/error.txt"`, odkud si jej agent v případě selhání volání může přečíst.
+
+### 4. Riziko nekonečného běhu agenta (Chybějící timeouty API volání)
+- **Závažnost:** Major
+- **Soubor a místo:** `double-cross-check/SKILL.md` (Sekce 6), `second-opinion/SKILL.md` (Sekce 3)
+- **Důvod:** Příkazy `codex -a never exec`, `claude -p` a `agy -p` volají vzdálené modely s nastavením "high/xhigh effort". Tato volání mohou trvat minuty. Pokud nedojde k odpovědi nebo API "zamrzne", CLI může viset donekonečna a zablokuje celou nadřazenou instanci agenta, který na dokončení bash příkazu čeká. Tabulka sice zmiňuje `--print-timeout` pro `agy`, ale u ostatních nástrojů řešení zcela chybí.
+- **Doporučená oprava:** Do všech Bash ukázek zabalit volání CLI přes utilitu `timeout` (např. `timeout 300 claude -p ...`), aby se zaručilo bezpečné ukončení skriptu při zaseknutí. K tomu je potřeba nezapomenout přidat `Bash(timeout:*)` do `allowed-tools`.
+
+### 5. Křehké předpoklady ohledně Gitu v ukázkách (`git diff main..HEAD`)
+- **Závažnost:** Minor
+- **Soubor a místo:** `double-cross-check/SKILL.md` (Sekce 7, příklad "Code review")
+- **Důvod:** Snippet s diffem provádí volání `git diff main..HEAD -- src/`. Tento příkaz natvrdo předpokládá, že defaultní branch repozitáře se jmenuje `main`. Ve spoustě projektů (nebo u starších repozitářů) se může jmenovat `master` nebo `develop`. Volání pak selže na chybě `fatal: bad revision 'main..HEAD'` a proces kontroly spadne dřív, než začne.
+- **Doporučená oprava:** Dopsat do příkladu poznámku pro agenta: `(Pozn.: uprav 'main' podle skutečné výchozí větve repozitáře, např. 'master')`, nebo použít robustnější konstrukci zjišťující target větev.
+
+### 6. Nesoulad v `allowed-tools` vs. instrukcích (Fiktivní fallback)
+- **Závažnost:** Minor
+- **Soubor a místo:** `references/cli-reference.md` (Sekce 2)
+- **Důvod:** Dokument říká: *"při selhání fallback na `codex:codex-rescue` (jeden retry)"*. Tento fallback mechanismus (ať už jde o subagenta nebo bash utilitu) ale není absolutně nikde definovaný v sekci `allowed-tools`. Agent nebude tušit, co to je, ani jak takový rescue zavolat, a začne halucinovat flagy jako `codex --rescue` apod.
+- **Doporučená oprava:** Zrušit tento matoucí krok a instrukce sjednotit – pokud Codex selže, ať zkrátka vyzkouší jiného providera (což dokument už částečně radí o větu dál). 
+
+### 7. Riziko zneužití `--dangerously-skip-permissions`
+- **Závažnost:** Nit / Minor
+- **Soubor a místo:** `references/cli-reference.md` (Sekce 4 - Tabulky voleb)
+- **Důvod:** V tabulce pro Antigravity (agy) je vylistován flag `--dangerously-skip-permissions`. Jelikož cross-check spouští LLM (který může halucinovat) v nekontrolovaném neinteraktivním prostředí, použití tohoto flagu by způsobilo tichý "sandbox escape" – podružná instance by mohla automaticky schválit destruktivní tooly, aniž by byl "user-in-the-loop". Přestože flag není v ukázkách aplikován, jeho pouhá přítomnost v tabulce voleb může agenta svádět k jeho použití při řešení běžných záseků s právy.
+- **Doporučená oprava:** Odstranit tento flag z tabulky referencí úplně. V cross-check scénáři nesmí být nikdy nasazen.
+
+--- Evaluation (Claude) ---
+Ověřovatelé: OpenAI/Codex (gpt-5.6 selhal na ChatGPT účtu -> běželo na default modelu, high effort) + Google/Gemini 3.1 Pro (High) přes agy.
+Metoda: oba dostali stejný bundle 4 souborů; nálezy re-anchorovány grepem na skutečné řádky (modely posílaly odhadované řádky).
+
+== EMPIRICKÉ NÁLEZY (z vlastního běhu, nad rámec obou modelů) ==
+E1 [Major] cli-reference.md:59,79,145,193-196 — doporučený default `-m gpt-5.6` selhává s ChatGPT-account auth:
+   "The 'gpt-5.6' model is not supported when using Codex with a ChatGPT account." Ověřeno vlastním voláním.
+   Reference tlačí gpt-5.6 jako default napříč všemi Codex příklady; commit 1.4.1 na něj právě přešel. Funguje jen s API-key auth.
+E2 [Major] agy default --print-timeout je 5m; velký prompt vrátil PRÁZDNÝ výstup (exit 0). Opraveno až --print-timeout 15m.
+   Empirický důkaz nálezu "chybějící timeouty", který oba modely zmínily jen teoreticky.
+
+== PŘIJATÉ NÁLEZY (ověřené proti souborům) ==
+A1 [Major] Log čte $WORK/answer.txt, ale quick patterns v SKILL.md píšou codex.txt/agy.txt/claude.txt.
+   double-cross-check: píše L133/138 -> log čte L286. second-opinion: píše L81/86/90 -> log čte L189.
+   (cli-reference.md je interně konzistentní, používá answer.txt všude — nesoulad je mezi SKILL quick patterns a log sekcí.)
+A2 [Major] cli-reference.md:131 a :182 — `claude --json-schema "$WORK/schema.json"` předává CESTU, ale `claude --help`
+   ukazuje, že flag bere INLINE JSON string: {"type":"object",...}. Navíc schema.json se v tom příkladu nikde nevytvoří.
+A3 [Major] second-opinion §8 (L205-251) "get opinions from all three" koliduje se self-review zákazem §1 (L48-54):
+   pokud skill běží v Claude, "all three" zavolá i Claude. Opravit na "všechny nezávislé rodiny kromě autora".
+A4 [Major/podmíněný] double-cross-check:295, second-opinion:198,248 — `git add "$LOG" && git commit -m ...` bez pathspec.
+   git add stáhne jen log, ALE holý `git commit` commitne celý index -> smete i změny, které měl uživatel předem ve stagingu.
+A5 [Minor] cli-reference.md:42-45 — `agy ... || { echo "failed"; }` skončí exit 0 (echo uspěje); i následné `[ -s ] || echo`
+   končí 0. Volající nemá jak strojově poznat selhání. Použít `if ! ... || [ ! -s ]; then return 1; fi`.
+A6 [Minor] cli-reference.md pattern `> "$WORK/answer.txt"` bez `2>` — při selhání API jde důvod na stderr a ztratí se;
+   soubor zůstane prázdný. Přidat `2> "$WORK/error.txt"`.
+A7 [Minor] double-cross-check:228 — `git diff main..HEAD` natvrdo předpokládá branch `main` (selže na master/develop).
+A8 [Minor] cli-reference.md:167 — `--dangerously-skip-permissions` v tabulce; v cross-check kontextu láká k sandbox-escape.
+A9 [Minor] Dva skilly se z ~80% překrývají; hranice second-opinion vs double-cross-check je nejasná (udržovatelnost).
+
+== ODMÍTNUTÉ / PŘEKVALIFIKOVANÉ NÁLEZY ==
+R1 Oba: "codex:codex-rescue neexistuje / je neproveditelný" — NEPŘESNÉ. V tomto prostředí je codex:codex-rescue
+   dostupný subagent (z codex companion pluginu, je v seznamu agent types). Reálný problém = nedeklarovaná
+   cross-plugin závislost, NE neexistence. Překvalifikováno z Major na Minor (dokumentovat závislost).
+R2 Codex "commit log = bug" — část odmítnuta. Verzování logu je DOKUMENTOVANÝ záměr skillu (§10). Bug je jen
+   holý commit bez pathspec (viz A4), ne fakt, že se loguje/commituje.
+R3 Codex #1 (sandbox: vynutit -s read-only, --safe-mode atd.) — SPEKULATIVNÍ pro tento účel. Skilly dělají
+   read-only textovou kontrolu; "ne v sandboxu" v referenci míří na dostupnost loginu, ne na povolení zápisu.
+   Flagy jako claude --safe-mode/--tools "" nejsou ověřené, že existují. Ponecháno jako "k zvážení", nepřijato jako blocker.
+R4 Codex #14/#15 (přesnost formulací "čerstvá instance bez kontextu" / "nemá živé zdroje") — editorial nuance,
+   ne funkční chyba. Nezapracovávám jako bug.
+R5 Modelové názvy Gemini ("Gemini 3.1 Pro (High)" atd.) — Codex i já ověřeno proti `agy models`: PLATNÉ. Není nález.
+
+== NEJISTOTY ==
+U1 Přesná náprava E1 (gpt-5.6 vs ChatGPT auth) závisí na tom, jaký typ Codex auth cílový uživatel používá —
+   doporučení: reference má varovat a nabídnout model funkční na obou (nebo runtime detekci).
+U2 Rozsah zásahu: doporučuji opravy, ale soubory jsem NEMĚNIL (skill má produkovat vyhodnocení, ne rewrite).
