@@ -25,6 +25,8 @@ allowed-tools:
   - Bash(echo:*)
   - Bash(git diff:*)
   - Bash(git log:*)
+  - Bash(git remote show:*)
+  - Bash(git symbolic-ref:*)
   - Bash(git add:*)
   - Bash(git commit:*)
 
@@ -128,19 +130,22 @@ Minimální příklady — kompletní vzory (strukturovaný výstup se schémate
 ```bash
 WORK=$(mktemp -d)
 
+# Ať použiješ kteréhokoli providera, odpověď ukládej do jednotného $WORK/answer.txt —
+# sekce „Uložení logu" níže z něj čte. Použij právě jeden z bloků.
+
 # Codex (OpenAI)
 codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
-  --output-last-message "$WORK/codex.txt" \
+  --output-last-message "$WORK/answer.txt" \
   "Tvá otázka tady"
-cat "$WORK/codex.txt"
+cat "$WORK/answer.txt"
 
 # Antigravity / agy (Google) — vždy Gemini model
-agy -p "Tvá otázka tady" --model "Gemini 3.1 Pro (High)" > "$WORK/agy.txt"
-cat "$WORK/agy.txt"
+agy -p "Tvá otázka tady" --model "Gemini 3.1 Pro (High)" --print-timeout 15m > "$WORK/answer.txt" 2> "$WORK/error.txt"
+cat "$WORK/answer.txt"
 
 # Claude Code (Anthropic)
-claude -p "Tvá otázka tady" --model opus --output-format text > "$WORK/claude.txt"
-cat "$WORK/claude.txt"
+claude -p "Tvá otázka tady" --model opus --output-format text > "$WORK/answer.txt"
+cat "$WORK/answer.txt"
 ```
 
 Pro schema-validovaný strukturovaný výstup použij Codex `--output-schema` nebo Claude `--json-schema` (reference §3); `agy` schema validaci nemá — JSON tvar vynucuj v promptu.
@@ -220,12 +225,16 @@ cat "$WORK/security.txt"
 
 ```bash
 WORK=$(mktemp -d)
+# Výchozí branch není vždy 'main' (může být master/develop) — zjisti ji dynamicky:
+BASE=$(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p')
+BASE=${BASE:-$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#origin/##')}
+BASE=${BASE:-main}
 claude -p "Review následujícího diffu na: bugy, výkonnostní problémy, udržovatelnost, test coverage gaps.
   Pro každou připomínku: lokace + závažnost (blocker / major / minor / nit) + návrh opravy.
   Buď skeptický k autorově optimismu.
 
   Diff:
-  $(git diff main..HEAD -- src/)" \
+  $(git diff "$BASE"..HEAD -- src/)" \
   --model opus --effort high --output-format text > "$WORK/review.txt"
 cat "$WORK/review.txt"
 ```
@@ -292,7 +301,7 @@ LOG="./.double-cross-check-talk_${TIMESTAMP}.log"
 echo "Log saved to: $LOG"
 
 # Logy jsou určené k verzování — pokud je projekt git repo, commitni log
-[ -d .git ] && git add "$LOG" && git commit -m "double-cross-check: log ${TIMESTAMP}"
+[ -d .git ] && git add "$LOG" && git commit "$LOG" -m "double-cross-check: log ${TIMESTAMP}"
 ```
 
 Při více iteracích připoj do logu každé kolo (`--- Iteration N: Prompt / Response / Evaluation ---`).

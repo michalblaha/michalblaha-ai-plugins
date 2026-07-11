@@ -25,6 +25,8 @@ allowed-tools:
   - Bash(echo:*)
   - Bash(git diff:*)
   - Bash(git log:*)
+  - Bash(git remote show:*)
+  - Bash(git symbolic-ref:*)
   - Bash(git add:*)
   - Bash(git commit:*)
 
@@ -76,19 +78,22 @@ Minimal one-shot examples. Full patterns (structured/schema output, images, work
 ```bash
 WORK=$(mktemp -d)
 
+# Whichever provider you use, write the answer to a single $WORK/answer.txt —
+# the "Saving the conversation log" section below reads from it. Use exactly one block.
+
 # Codex (OpenAI)
 codex -a never exec --skip-git-repo-check -m gpt-5.6 -c 'model_reasoning_effort="high"' \
-  --output-last-message "$WORK/codex.txt" \
+  --output-last-message "$WORK/answer.txt" \
   "Your question here"
-cat "$WORK/codex.txt"
+cat "$WORK/answer.txt"
 
 # Antigravity / agy (Google) — always a Gemini model
-agy -p "Your question here" --model "Gemini 3.1 Pro (High)" > "$WORK/agy.txt"
-cat "$WORK/agy.txt"
+agy -p "Your question here" --model "Gemini 3.1 Pro (High)" --print-timeout 15m > "$WORK/answer.txt" 2> "$WORK/error.txt"
+cat "$WORK/answer.txt"
 
 # Claude Code (Anthropic)
-claude -p "Your question here" --model opus --output-format text > "$WORK/claude.txt"
-cat "$WORK/claude.txt"
+claude -p "Your question here" --model opus --output-format text > "$WORK/answer.txt"
+cat "$WORK/answer.txt"
 ```
 
 For schema-validated structured output use Codex `--output-schema` or Claude `--json-schema` (see reference §3); `agy` has no schema support — enforce JSON shape in the prompt.
@@ -195,14 +200,16 @@ LOG="./.second-opinion-talk_${TIMESTAMP}.log"
 echo "Log saved to: $LOG"
 
 # The logs are meant to be versioned — commit the log if the project is a git repo
-[ -d .git ] && git add "$LOG" && git commit -m "second-opinion: log ${TIMESTAMP}"
+[ -d .git ] && git add "$LOG" && git commit "$LOG" -m "second-opinion: log ${TIMESTAMP}"
 ```
 
 ---
 
 ## 8. Multi-Provider Consensus Example
 
-Get second opinions from all three providers and compare:
+**Respect the self-review ban from §1:** if the skill itself is running as one of the three families (e.g. you are Claude), **drop that provider** — a model reviewing its own family shares its blind spots. "All three" below means all independent families *other than the one that produced the answer*; in practice that is usually two providers.
+
+Get second opinions from the remaining independent providers and compare:
 
 ```bash
 WORK=$(mktemp -d)
@@ -245,7 +252,7 @@ LOG="./.second-opinion-talk_${TIMESTAMP}.log"
   echo "--- Claude ---"; cat "$WORK/claude_opinion.txt"
   echo "--- Evaluation ---"; cat "$WORK/evaluation.txt"
 } > "$LOG"
-[ -d .git ] && git add "$LOG" && git commit -m "second-opinion: log ${TIMESTAMP}"
+[ -d .git ] && git add "$LOG" && git commit "$LOG" -m "second-opinion: log ${TIMESTAMP}"
 ```
 
 Analyze agreement/disagreement across all three providers and synthesize a final recommendation.

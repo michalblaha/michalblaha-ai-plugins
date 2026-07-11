@@ -34,14 +34,19 @@ claude --version || echo "Claude Code CLI není nainstalované"
 
 **Codex — povinná kombinace `-a never exec --skip-git-repo-check`:** každé volání Codexu z těchto skillů má tvar `codex -a never exec --skip-git-repo-check ...`. Codex defaultně odmítne běžet mimo git repo; skilly přes něj nic nezapisují, takže check je zbytečný. Bez flagu volání selže s chybou *"not inside a Git repository"*.
 
-**Fallback při selhání Codexu:** pokud `codex exec` selže i s flagy (timeout, autentizace, runtime error), deleguj na `codex:codex-rescue` skill / subagent. Jen jeden retry; pokud selže i ten, přepni na jiného providera a poznač selhání do sekce *Nejistoty* finální odpovědi.
+**Fallback při selhání Codexu:** pokud `codex exec` selže i s flagy (timeout, autentizace, runtime error), deleguj na `codex:codex-rescue` (subagent z **externího** codex companion pluginu — není součástí `ai-review`; pokud v prostředí není dostupný, tento krok přeskoč). Jen jeden retry; pokud selže i ten, přepni na jiného providera a poznač selhání do sekce *Nejistoty* finální odpovědi.
 
 **Kontrola selhání u všech providerů:** `agy` a `claude` při chybě typicky zapíšou prázdný výstupní soubor. Po každém volání ověř exit kód — prázdný soubor znamená **selhání volání, ne prázdnou odpověď externího modelu**:
 
 ```bash
-agy -p "…" --model "Gemini 3.1 Pro (High)" > "$WORK/answer.txt" \
-  || { echo "agy call failed"; }
-[ -s "$WORK/answer.txt" ] || echo "WARNING: empty answer — treat as provider failure"
+# Zachyť i stderr (2>) — tam CLI píše důvod selhání (rate limit, expirovaný token, timeout).
+# Pozor: `cmd || { echo ...; }` po echu vrátí exit 0 a selhání zamaskuje — větvi přes if a čti stav.
+if ! agy -p "…" --model "Gemini 3.1 Pro (High)" --print-timeout 15m \
+      > "$WORK/answer.txt" 2> "$WORK/error.txt" || [ ! -s "$WORK/answer.txt" ]; then
+  echo "WARNING: agy call failed — treat as provider failure. Důvod:"
+  cat "$WORK/error.txt"
+  # -> jeden retry, pak přepni providera a poznač do *Nejistot*
+fi
 ```
 
 Po jednom retry přepni na jiného providera a selhání poznač do *Nejistot*. Nikdy nevyhodnocuj prázdný soubor jako platnou odpověď.
@@ -127,8 +132,16 @@ claude -p "Tvá otázka tady" --model claude-opus-4-7 \
 claude -p "Tvá otázka tady" --model haiku --output-format text > "$WORK/answer.txt"
 
 # Strukturovaný výstup s validací JSON Schema
+# POZOR: Claude Code bere za --json-schema INLINE JSON string (schéma samotné), NE cestu k souboru.
+# Máš-li schéma v souboru, dosaď jeho obsah přes $(cat ...).
+cat > "$WORK/schema.json" <<'EOF'
+{ "type": "object",
+  "properties": { "assessment": { "type": "string" } },
+  "required": ["assessment"],
+  "additionalProperties": false }
+EOF
 claude -p "Analyzuj [téma]. Vrať strukturované zhodnocení." \
-  --model opus --json-schema "$WORK/schema.json" > "$WORK/result.json"
+  --model opus --json-schema "$(cat "$WORK/schema.json")" > "$WORK/result.json"
 cat "$WORK/result.json"
 ```
 
@@ -162,9 +175,9 @@ cat "$WORK/result.json"
 | `--model "Claude Opus 4.6 (Thinking)"` | Anthropic přes agy (pro cross-check **nepoužívej** — ztrácíš nezávislost providera) |
 | `--model "GPT-OSS 120B (Medium)"` | Open-source GPT-OSS model |
 | `-p "prompt"` / `--print` / `--prompt` | Neinteraktivní print mode (povinné pro skripty) |
-| `--print-timeout 5m` | Timeout pro print mode (default 5m) |
+| `--print-timeout 15m` | Timeout pro print mode. **Default 5m nestačí** na velký prompt s high/xhigh reasoning — `agy` pak vrátí prázdný výstup (exit 0). Pro cross-check dávej `15m`. |
 | `--add-dir <path>` | Přidá adresář do workspace (repeatable) — grounding nad reálnými soubory |
-| `--dangerously-skip-permissions` | Auto-approve tool permission promptů (jen pro neinteraktivní skripty) |
+| `--dangerously-skip-permissions` | Auto-approve tool permission promptů. **Pro cross-check NEPOUŽÍVAT** — spuštěný model může halucinovat a tichý auto-approve = sandbox escape bez user-in-the-loop. |
 | `agy models` | Vypíše seznam dostupných modelů |
 | `agy install` | První nastavení (PATH, shell aliases) |
 
@@ -179,7 +192,7 @@ cat "$WORK/result.json"
 | `--effort xhigh` | Hluboké uvažování. Hodnoty: `low`, `medium`, `high`, `xhigh`, `max` |
 | `-p "prompt"` | Neinteraktivní print mode (povinné pro skripty) |
 | `--output-format text` / `json` | Formát výstupu (`json` = strukturovaný message objekt) |
-| `--json-schema file.json` | Strukturovaný JSON s validací schématu |
+| `--json-schema '<json>'` | Strukturovaný JSON s validací schématu — argument je **inline JSON schéma**, ne cesta k souboru (ze souboru: `--json-schema "$(cat schema.json)"`) |
 | `--max-turns N` | Strop agentních kol (default: bez limitu) |
 | `--max-budget-usd N` | Strop útraty na session |
 | `--permission-mode bypassPermissions` | Pro CI / non-interactive bez schvalování — jen se souhlasem uživatele |
